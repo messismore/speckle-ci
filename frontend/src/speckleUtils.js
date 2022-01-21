@@ -1,4 +1,8 @@
-import { userInfoQuery, streamSearchQuery } from '@/speckleQueries'
+import {
+  userInfoQuery,
+  streamListAllQuery,
+  streamSearchQuery,
+} from '@/speckleQueries'
 
 export const APP_NAME = process.env.VUE_APP_SPECKLE_APP_NAME
 export const SERVER_URL = process.env.VUE_APP_SPECKLE_SERVER_URL
@@ -75,4 +79,6 @@ export const speckleFetch = async (query) => {
 
 export const getUserData = () => speckleFetch(userInfoQuery())
 
-export const searchStreams = (e) => speckleFetch(streamSearchQuery(e))
+export const searchStreams = (query) => speckleFetch(streamSearchQuery(query))
+
+export const listAllStreams = () => speckleFetch(streamListAllQuery())

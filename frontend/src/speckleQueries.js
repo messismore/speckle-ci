@@ -19,3 +19,11 @@ export const streamSearchQuery = (search) => `query {
     }
   }
 }`
+
+export const streamListAllQuery = () => `query {
+  streams {
+    items {
+      name
+    }
+  }
+}`
