@@ -1,11 +1,10 @@
 import express from 'express'
 import cors from 'cors'
-import bodyParser from 'body-parser'
 
 const app = express()
 
 app.use(cors())
-app.use(bodyParser.json())
+app.use(express.json())
 
 // Initialise default modules, including rest api handlers
 // const init = async () => import('./modules/index.js')
