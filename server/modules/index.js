@@ -1,4 +1,4 @@
-const moduleDirs = ['./auth']
+const moduleDirs = ['./workflows']
 
 export const init = async (app) => {
   console.log('Starting to initialise modules…')
