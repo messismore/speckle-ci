@@ -1,12 +1,11 @@
 import { Router } from 'express'
-import isAuthorized from '../services/isAuthorized.js'
+import isAuthorizedWithSpeckle from '../services/isAuthorizedWithSpeckle.js'
 
 const router = Router()
 
-router.use(isAuthorized)
+router.use(isAuthorizedWithSpeckle)
 
 router.get('/', (req, res) => {
-  // we check the token and
   res.status(501).json('Not Implemented')
 })
 

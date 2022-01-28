@@ -1,6 +1,8 @@
 import { fetchSpeckleUserId } from '/app/modules/shared/speckleUtils.js'
 
-const isAuthorized = async (req, res, next) => {
+const isAuthorizedWithSpeckle = async (req, res, next) => {
+  // clear our special header
+  req.headers['authorized-speckle-user-id'] = ''
   // check if there is a token
   if (req.body.token) {
     // make sure it belongs to a user
@@ -12,7 +14,7 @@ const isAuthorized = async (req, res, next) => {
 
       if (json.data.data.user.id) {
         // add the user to the request header
-        req.headers['user-id'] = json.data.data.user.id
+        req.headers['authorized-speckle-user-id'] = json.data.data.user.id
 
         //console.log(json.data.data.user.id)
         return next()
@@ -27,4 +29,4 @@ const isAuthorized = async (req, res, next) => {
   return res.status(400).send('Bad Request')
 }
 
-export default isAuthorized
+export default isAuthorizedWithSpeckle
