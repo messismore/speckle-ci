@@ -15,5 +15,16 @@ services:
     volumes:
       - /app/node_modules
       - ./server:/app
+    environment:
+      - DB_URL=mongodb://mongo:27017/userdb
     ports:
       - '4000:4000'
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    volumes:
+      - ./tmp/data:/data/db
+    ports:
+      - '27017:27017'
