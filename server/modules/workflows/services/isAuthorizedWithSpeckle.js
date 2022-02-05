@@ -1,32 +1,22 @@
 import { fetchSpeckleUserId } from '/app/modules/shared/speckleUtils.js'
+import getBearerToken from '/app/modules/shared/getBearerToken.js'
 
 const isAuthorizedWithSpeckle = async (req, res, next) => {
-  // clear our special header
-  req.headers['authorized-speckle-user-id'] = ''
-  // check if there is a token
-  if (req.body.token) {
+  try {
     // make sure it belongs to a user
-    try {
-      const json = await fetchSpeckleUserId(req.body.token)
-      if (json.data.errors) {
-        return res.status(401).send('Unauthorized')
-      }
+    const json = await fetchSpeckleUserId(getBearerToken(req))
 
-      if (json.data.data.user.id) {
-        // add the user to the request header
-        req.headers['authorized-speckle-user-id'] = json.data.data.user.id
-
-        //console.log(json.data.data.user.id)
-        return next()
-      }
-    } catch (err) {
-      console.error(err)
-      return res.status(500).send('Internal Server Error')
+    // store user in req.locals
+    res.locals.authorizedSpeckleUserId = json.data.data.user.id
+    return next()
+  } catch (error) {
+    // if there is no token or Speckle didn't return a user Id we'll get a TypeError
+    if (error instanceof TypeError) {
+      error.status = 401
     }
+    if (!error.status) error.status = 500
+    next(error)
   }
-
-  // else deny request
-  return res.status(400).send('Bad Request')
 }
 
 export default isAuthorizedWithSpeckle
