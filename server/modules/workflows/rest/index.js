@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import getBearerToken from '/app/modules/shared/getBearerToken.js'
 import isAuthorizedWithSpeckle from '../services/isAuthorizedWithSpeckle.js'
-import { createWorkflow } from '../services/workflows.js'
+import Workflow from '../services/workflows.js'
 
 const router = Router()
 
@@ -16,12 +16,13 @@ router.post('/', async (req, res, next) => {
   try {
     const token = getBearerToken(req)
 
-    await createWorkflow({
+    await Workflow.create({
       token: token,
       streamId: req.query.streamId,
       name: req.query.name,
       url: req.query.url,
-      triggers: [...req.query.triggers],
+      // req.query.triggers will either be String or Array<String>
+      triggers: [].concat(req.query.triggers),
     })
     res.status(200).json('OK')
   } catch (error) {
