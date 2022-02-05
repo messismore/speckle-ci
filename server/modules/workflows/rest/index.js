@@ -24,9 +24,10 @@ router.post('/', async (req, res, next) => {
       triggers: [...req.query.triggers],
     })
     res.status(200).json('OK')
-  } catch (err) {
-    res.status(err.status ? err.status : 500)
-    next(err)
+  } catch (error) {
+    console.log(error)
+    error.status = error.response.status ? error.response.status : 500
+    next(error)
   }
 })
 
