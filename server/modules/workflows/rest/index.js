@@ -16,9 +16,13 @@ router.post('/', async (req, res, next) => {
   try {
     const token = getBearerToken(req)
 
-    await createWorkflow(token, req.query.streamId, req.query.url, [
-      ...req.query.triggers,
-    ])
+    await createWorkflow({
+      token: token,
+      streamId: req.query.streamId,
+      name: req.query.name,
+      url: req.query.url,
+      triggers: [...req.query.triggers],
+    })
     res.status(200).json('OK')
   } catch (err) {
     res.status(err.status ? err.status : 500)

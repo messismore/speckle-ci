@@ -31,5 +31,16 @@ const speckleFetch = async (token, query) => {
 export const fetchSpeckleUserId = async (token) =>
   speckleFetch(token, userIdQuery())
 
-export const speckleRegisterWebhook = async (token, streamId, url, triggers) =>
-  speckleFetch(token, registerWebhookMutation(streamId, url, triggers))
+export const speckleRegisterWebhook = async (
+  token,
+  streamId,
+  url,
+  description = '',
+  triggers,
+  secret = '',
+  enabled = true
+) =>
+  speckleFetch(
+    token,
+    registerWebhookMutation(streamId, url, description, triggers)
+  )
