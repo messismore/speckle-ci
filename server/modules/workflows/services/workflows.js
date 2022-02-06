@@ -17,6 +17,8 @@ const TRIGGERS = [
 ]
 
 const workflowSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  description: String,
   webhookId: { type: String, required: true },
   streamId: { type: String, required: true },
   createdAt: { type: Date, default: Date.now() },
@@ -46,6 +48,7 @@ workflowSchema.statics.create = async function ({
   }).then((res) => res.data.data.webhookCreate)
 
   const workflow = await new this({
+    name: name,
     webhookId: webhookId,
     streamId: streamId,
   }).save()
