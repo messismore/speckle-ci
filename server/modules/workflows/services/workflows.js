@@ -28,19 +28,22 @@ workflowSchema.statics.create = async function ({
   token,
   streamId,
   name,
-  url,
   triggers,
 }) {
   if (!triggers.every((trigger) => TRIGGERS.includes(trigger)))
     throw createError(400, 'Unknown trigger')
 
-  const webhookId = await speckleRegisterWebhook(
-    token,
-    streamId,
-    url,
-    `Workflow '${name}'`,
-    triggers
-  ).then((res) => res.data.data.webhookCreate)
+  const port = await import('/app/server.js').then(
+    (module) => module.default.address().port
+  )
+
+  const webhookId = await speckleRegisterWebhook({
+    token: token,
+    streamId: streamId,
+    url: `https://${process.env.APP_SERVER_URL}:${port}/webhooks`,
+    description: `Workflow ${name}`,
+    triggers: triggers,
+  }).then((res) => res.data.data.webhookCreate)
 
   const workflow = await new this({
     webhookId: webhookId,

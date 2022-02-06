@@ -18,7 +18,6 @@ router.post('/', async (req, res, next) => {
       token: token,
       streamId: req.query.streamId,
       name: req.query.name,
-      url: req.query.url,
       // req.query.triggers will either be String or Array<String>
       triggers: [].concat(req.query.triggers),
     })
