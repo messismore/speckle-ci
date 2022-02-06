@@ -19,7 +19,7 @@ const speckleFetch = async (token, query) => {
   return response
 }
 
-export const fetchSpeckleUserId = async (token) =>
+export const fetchSpeckleUserId = async ({ token }) =>
   speckleFetch(token, userIdQuery())
 
 export const speckleRegisterWebhook = async ({
