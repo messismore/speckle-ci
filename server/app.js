@@ -29,7 +29,4 @@ app.use((err, req, res, next) => {
   res.json(req.app.get('env') === 'development' ? err : {})
 })
 
-const port = process.env.PORT || 4000
-app.listen(port, () => {
-  console.log(`listening on ${port}`)
-})
+export default app
