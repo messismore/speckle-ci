@@ -3,7 +3,7 @@ import { userIdQuery } from './speckleQueries.js'
 import { registerWebhookMutation } from './speckleMutations.js'
 
 const speckleFetch = async (token, query) => {
-  const request = await axios.post(
+  const response = await axios.post(
     `${process.env.SPECKLE_SERVER_URL}/graphql`,
     JSON.stringify({
       query: query,
@@ -16,7 +16,7 @@ const speckleFetch = async (token, query) => {
     }
   )
 
-  return request
+  return response
 }
 
 export const fetchSpeckleUserId = async (token) =>
