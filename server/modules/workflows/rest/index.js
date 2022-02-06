@@ -16,10 +16,10 @@ router.post('/', async (req, res, next) => {
 
     await Workflow.create({
       token: token,
-      streamId: req.query.streamId,
-      name: req.query.name,
+      streamId: req.body.streamId,
+      name: req.body.name,
       // req.query.triggers will either be String or Array<String>
-      triggers: [].concat(req.query.triggers),
+      triggers: [].concat(req.body.triggers),
     })
     res.status(200).json('OK')
   } catch (error) {
@@ -31,5 +31,17 @@ router.post('/', async (req, res, next) => {
     next(error)
   }
 })
+
+router.get('/:workflowId', (req, res, next) => {
+  next(Workflow.findByUserId({ token: getBearerToken(req) }))
+})
+
+router.patch('/:workflowId', (req, res, next) =>
+  next(createError(501, 'Not Implemented'))
+)
+
+router.delete('/:workflowId', (req, res, next) =>
+  next(createError(501, 'Not Implemented'))
+)
 
 export default router
