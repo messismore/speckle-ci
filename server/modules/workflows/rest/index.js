@@ -1,3 +1,4 @@
+import createError from 'http-errors'
 import { Router } from 'express'
 import getBearerToken from '/app/modules/shared/getBearerToken.js'
 import isAuthorizedWithSpeckle from '../services/isAuthorizedWithSpeckle.js'
@@ -7,10 +8,7 @@ const router = Router()
 
 router.use(isAuthorizedWithSpeckle)
 
-router.get('/', (req, res) => {
-  console.log('501')
-  res.status(501).json('Not Implemented')
-})
+router.get('/', (req, res, next) => next(createError(501, 'Not Implemented')))
 
 router.post('/', async (req, res, next) => {
   try {
@@ -26,8 +24,11 @@ router.post('/', async (req, res, next) => {
     })
     res.status(200).json('OK')
   } catch (error) {
-    console.log(error)
-    error.status = error.response.status ? error.response.status : 500
+    if (!error.status) {
+      error.status =
+        error.response && error.response.status ? error.response.status : 500
+    }
+
     next(error)
   }
 })

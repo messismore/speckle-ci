@@ -31,12 +31,8 @@ workflowSchema.statics.create = async function ({
   url,
   triggers,
 }) {
-  if (!triggers.every((trigger) => TRIGGERS.includes(trigger))) {
-    const error = new Error()
-    error.status = 400
-    error.message = 'Unknown trigger'
-    throw error
-  }
+  if (!triggers.every((trigger) => TRIGGERS.includes(trigger)))
+    throw createError(400, 'Unknown trigger')
 
   const webhookId = await speckleRegisterWebhook(
     token,

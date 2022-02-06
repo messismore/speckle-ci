@@ -16,15 +16,6 @@ const speckleFetch = async (token, query) => {
     }
   )
 
-  if (request.data.errors) {
-    const error = {
-      status: request.data.errors[0].extensions.code == 'FORBIDDEN' ? 403 : 400,
-      ...request.data.errors.shift(),
-      furtherErrors: request.data.errors,
-    }
-
-    throw new Error('Request to Speckle failed: ' + error.message, error)
-  }
   return request
 }
 
