@@ -1,6 +1,9 @@
 import createError from 'http-errors'
 import mongoose from 'mongoose'
-import { speckleRegisterWebhook } from '/app/modules/shared/speckleUtils.js'
+import {
+  fetchSpeckleUserStreamIds,
+  speckleRegisterWebhook,
+} from '/app/modules/shared/speckleUtils.js'
 
 const TRIGGERS = [
   'branch_create',
@@ -24,6 +27,12 @@ const workflowSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now() },
   updatedAt: Date,
 })
+
+workflowSchema.statics.findByUserId = async function ({ token, userId }) {
+  return this.find({
+    streamId: await fetchSpeckleUserStreamIds({ token: token, userId: userId }),
+  }).exec()
+}
 
 // Create Workflow
 workflowSchema.statics.create = async function ({

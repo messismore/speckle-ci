@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { userIdQuery } from './speckleQueries.js'
+import { userIdQuery, userStreamIdsQuery } from './speckleQueries.js'
 import { registerWebhookMutation } from './speckleMutations.js'
 
 const speckleFetch = async (token, query) => {
@@ -21,6 +21,11 @@ const speckleFetch = async (token, query) => {
 
 export const fetchSpeckleUserId = async ({ token }) =>
   speckleFetch(token, userIdQuery())
+
+export const fetchSpeckleUserStreamIds = async ({ token, userId }) =>
+  speckleFetch(token, userStreamIdsQuery({ userId: userId })).then((res) =>
+    res.data.data.user.streams.items.map((stream) => stream.id)
+  )
 
 export const speckleRegisterWebhook = async ({
   token,
