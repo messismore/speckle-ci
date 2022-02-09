@@ -1,3 +1,4 @@
+import createError from 'http-errors'
 import axios from 'axios'
 import { userIdQuery, userStreamIdsQuery } from './speckleQueries.js'
 import { registerWebhookMutation } from './speckleMutations.js'
@@ -23,9 +24,10 @@ export const fetchSpeckleUserId = async ({ token }) =>
   speckleFetch(token, userIdQuery())
 
 export const fetchSpeckleUserStreamIds = async ({ token, userId }) =>
-  speckleFetch(token, userStreamIdsQuery({ userId: userId })).then((res) =>
-    res.data.data.user.streams.items.map((stream) => stream.id)
-  )
+  speckleFetch(token, userStreamIdsQuery({ userId: userId })).then((res) => {
+    if (!res.data.data.user) throw createError('404', 'User not found')
+    return res.data.data.user.streams.items.map((stream) => stream.id)
+  })
 
 export const speckleRegisterWebhook = async ({
   token,
