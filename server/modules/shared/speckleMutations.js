@@ -1,9 +1,9 @@
 export const registerWebhookMutation = (
   streamId,
   url,
-  description = '',
+  description,
   triggers,
-  secret = '',
+  secret,
   enabled = true
 ) => `mutation {
   webhookCreate(webhook: {

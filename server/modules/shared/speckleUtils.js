@@ -33,12 +33,19 @@ export const speckleRegisterWebhook = async ({
   token,
   streamId,
   url,
-  description = '',
+  description,
   triggers,
-  secret = '',
+  secret,
   enabled = true,
 }) =>
   speckleFetch(
     token,
-    registerWebhookMutation(streamId, url, description, triggers)
+    registerWebhookMutation(
+      streamId,
+      url,
+      description,
+      triggers,
+      secret,
+      enabled
+    )
   )
