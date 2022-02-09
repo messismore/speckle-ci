@@ -13,3 +13,13 @@ export const userStreamIdsQuery = ({ userId }) => `{
     }
   }
 }`
+
+export const webhookTriggersQuery = ({ streamId, webhookId }) => `{
+ stream(id: ${JSON.stringify(streamId)}) {
+   webhooks(id: ${JSON.stringify(webhookId)}) {
+     items {
+       triggers
+     }
+   }
+ }
+}`

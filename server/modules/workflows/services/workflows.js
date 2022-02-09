@@ -1,23 +1,11 @@
 import createError from 'http-errors'
 import mongoose from 'mongoose'
 import {
+  fetchSpeckleWebhookTriggers,
   fetchSpeckleUserStreamIds,
   registerSpeckleWebhook,
 } from '/app/modules/shared/speckleUtils.js'
-
-const TRIGGERS = [
-  'branch_create',
-  'branch_delete',
-  'branch_update',
-  'commit_create',
-  'commit_delete',
-  'commit_update',
-  'stream_delete',
-  'stream_update',
-  'commit_receive',
-  'stream_permissions_add',
-  'stream_permissions_remove',
-]
+import areValidSpeckleTriggers from './areValidSpeckleWebhookTriggers.js'
 
 const workflowSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -41,7 +29,7 @@ workflowSchema.statics.create = async function ({
   name,
   triggers,
 }) {
-  if (!triggers.every((trigger) => TRIGGERS.includes(trigger)))
+  if (!areValidSpeckleTriggers(triggers))
     throw createError(400, 'Unknown trigger')
 
   const port = await import('/app/server.js').then(
@@ -63,6 +51,34 @@ workflowSchema.statics.create = async function ({
   }).save()
 
   return workflow
+}
+
+// We don't store triggers, since they can be changed over at Speckle
+workflowSchema.methods.fetchTriggers = async function ({ token }) {
+  return fetchSpeckleWebhookTriggers({
+    token,
+    streamId: this.streamId,
+    webhookId: this.webhookId,
+  })
+}
+
+// Update Workflow
+workflowSchema.methods.update = async function ({
+  token,
+  name,
+  description,
+  webhookId,
+  streamId,
+  triggers,
+}) {
+  console.log(token, name, description, webhookId, streamId, triggers)
+  throw new Error('Not implemented yet')
+}
+
+// Delete Workflow
+workflowSchema.methods.delete = async function ({ token }) {
+  console.log(token)
+  throw new Error('Not implemented yet')
 }
 
 export default mongoose.model('Workflow', workflowSchema)
