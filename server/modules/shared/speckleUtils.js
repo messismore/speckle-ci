@@ -29,7 +29,7 @@ export const fetchSpeckleUserStreamIds = async ({ token, userId }) =>
     return res.data.data.user.streams.items.map((stream) => stream.id)
   })
 
-export const speckleRegisterWebhook = async ({
+export const registerSpeckleWebhook = async ({
   token,
   streamId,
   url,

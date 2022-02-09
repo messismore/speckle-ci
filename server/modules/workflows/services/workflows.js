@@ -2,7 +2,7 @@ import createError from 'http-errors'
 import mongoose from 'mongoose'
 import {
   fetchSpeckleUserStreamIds,
-  speckleRegisterWebhook,
+  registerSpeckleWebhook,
 } from '/app/modules/shared/speckleUtils.js'
 
 const TRIGGERS = [
@@ -48,7 +48,7 @@ workflowSchema.statics.create = async function ({
     (module) => module.default.address().port
   )
 
-  const webhookId = await speckleRegisterWebhook({
+  const webhookId = await registerSpeckleWebhook({
     token: token,
     streamId: streamId,
     url: `https://${process.env.APP_SERVER_URL}:${port}/webhooks`,
