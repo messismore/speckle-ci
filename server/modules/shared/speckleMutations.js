@@ -3,9 +3,9 @@ export const registerWebhookMutation = (
   url,
   description,
   triggers,
-  secret,
   enabled = true
 ) => `mutation {
+  secret = '',
   webhookCreate(webhook: {
     streamId: ${JSON.stringify(streamId)},
     url: ${JSON.stringify(url)},

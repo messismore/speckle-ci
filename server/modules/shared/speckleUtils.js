@@ -57,7 +57,7 @@ export const registerSpeckleWebhook = async ({
   url,
   description,
   triggers,
-  secret,
+  secret = '',
   enabled = true,
 }) =>
   speckleFetch(
