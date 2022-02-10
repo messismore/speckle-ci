@@ -5,7 +5,10 @@ import {
   userIdQuery,
   userStreamIdsQuery,
 } from './speckleQueries.js'
-import { registerWebhookMutation } from './speckleMutations.js'
+import {
+  registerWebhookMutation,
+  setWebhookTriggers,
+} from './speckleMutations.js'
 
 const speckleFetch = async (token, query) => {
   if (!token) throw createError(403, 'Missing auth token')
@@ -74,3 +77,18 @@ export const registerSpeckleWebhook = async ({
       enabled,
     })
   )
+
+// Sets webhook's triggers
+export const setSpeckleWebhookTriggers = async ({
+  token,
+  streamId,
+  webhookId,
+  triggers,
+}) =>
+  speckleFetch(
+    token,
+    setWebhookTriggers({ streamId, webhookId, triggers })
+  ).then((res) => {
+    if (!res.data.data.webHookUpdate) throw new Error('Failed to set triggers')
+    return res.data.data.webHookUpdate
+  })

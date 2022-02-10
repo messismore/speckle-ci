@@ -4,6 +4,7 @@ import {
   fetchSpeckleWebhookTriggers,
   fetchSpeckleUserStreamIds,
   registerSpeckleWebhook,
+  setSpeckleWebhookTriggers,
 } from '/app/modules/shared/speckleUtils.js'
 import areValidSpeckleTriggers from './areValidSpeckleWebhookTriggers.js'
 
@@ -59,6 +60,18 @@ workflowSchema.methods.fetchTriggers = async function ({ token }) {
     token,
     streamId: this.streamId,
     webhookId: this.webhookId,
+  })
+}
+
+workflowSchema.methods.setTriggers = async function ({ token, triggers }) {
+  if (!areValidSpeckleTriggers(triggers))
+    throw createError(400, 'Unknown trigger')
+
+  return setSpeckleWebhookTriggers({
+    token,
+    streamId: this.streamId,
+    webhookId: this.webhookId,
+    triggers,
   })
 }
 

@@ -15,3 +15,16 @@ export const registerWebhookMutation = ({
     enabled: ${JSON.stringify(enabled)},
   })
 }`
+
+export const setWebhookTriggers = ({
+  streamId,
+  webhookId,
+  triggers,
+}) => `mutation {
+  webhookUpdate(
+    webhook: {
+      streamId: ${JSON.stringify(streamId)},
+      id: ${JSON.stringify(webhookId)},
+      triggers: ${JSON.stringify(triggers)}}
+  )
+}`
