@@ -8,6 +8,7 @@ import {
 import { registerWebhookMutation } from './speckleMutations.js'
 
 const speckleFetch = async (token, query) => {
+  if (!token) throw createError(403, 'Missing auth token')
   const response = await axios.post(
     `${process.env.SPECKLE_SERVER_URL}/graphql`,
     JSON.stringify({
@@ -24,9 +25,11 @@ const speckleFetch = async (token, query) => {
   return response
 }
 
+// Returns the user ID associated with a token
 export const fetchSpeckleUserId = async ({ token }) =>
   speckleFetch(token, userIdQuery())
 
+// Returns all stream IDs associated with a user
 export const fetchSpeckleUserStreamIds = async ({ token, userId }) =>
   speckleFetch(token, userStreamIdsQuery({ userId: userId })).then((res) => {
     if (!res.data.data.user) throw createError('404', 'User not found')
@@ -62,12 +65,12 @@ export const registerSpeckleWebhook = async ({
 }) =>
   speckleFetch(
     token,
-    registerWebhookMutation(
+    registerWebhookMutation({
       streamId,
       url,
       description,
       triggers,
       secret,
-      enabled
-    )
+      enabled,
+    })
   )

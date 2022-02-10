@@ -5,7 +5,7 @@ export const userIdQuery = () => `query {
 }`
 
 export const userStreamIdsQuery = ({ userId }) => `{
-  user(id: "${userId}") {
+  user(id: ${JSON.stringify(userId)}) {
     streams {
       items {
         id
