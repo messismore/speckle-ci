@@ -29,8 +29,7 @@ router.post('/', async (req, res, next) => {
       token: getBearerToken(req),
       streamId: req.body.streamId,
       name: req.body.name,
-      // req.query.triggers will either be String or Array<String>
-      triggers: [].concat(req.body.triggers),
+      triggers: body.triggers,
     })
     res.status(200).json('OK')
   } catch (error) {
