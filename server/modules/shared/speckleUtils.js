@@ -89,6 +89,6 @@ export const setSpeckleWebhookTriggers = async ({
     token,
     setWebhookTriggers({ streamId, webhookId, triggers })
   ).then((res) => {
-    if (!res.data.data.webHookUpdate) throw new Error('Failed to set triggers')
-    return res.data.data.webHookUpdate
+    if (!res.data.data.webhookUpdate) throw new Error('Failed to set triggers')
+    return res.data.data.webhookUpdate
   })
