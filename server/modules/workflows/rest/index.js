@@ -39,8 +39,23 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.get('/:workflowId', (req, res, next) => {
-  next(Workflow.findByUserId({ token: getBearerToken(req) }))
+router.get('/:workflowId', async (req, res, next) => {
+  try {
+    const workflow = await Workflow.findOne({
+      _id: req.params.workflowId,
+    })
+      .select('-__v') // don't return version key https://mongoosejs.com/docs/guide.html#versionKey
+      .exec()
+
+    const triggers = await workflow.fetchTriggers({
+      token: getBearerToken(req),
+    })
+
+    res.json({ ...workflow.toJSON(), triggers })
+  } catch (error) {
+    setResponseErrorCode(error)
+    next(error)
+  }
 })
 
 router.patch('/:workflowId', (req, res, next) =>
