@@ -20,7 +20,9 @@ const workflowSchema = new mongoose.Schema({
 workflowSchema.statics.findByUserId = async function ({ token, userId }) {
   return this.find({
     streamId: await fetchSpeckleUserStreamIds({ token: token, userId: userId }),
-  }).exec()
+  })
+    .select('-__v') // don't return version key https://mongoosejs.com/docs/guide.html#versionKey
+    .exec()
 }
 
 // Create Workflow
