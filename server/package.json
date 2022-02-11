@@ -4,14 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon index.js",
+    "serve": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "axios": "^0.25.0",
     "cors": "^2.8.5",
     "dotenv": "^14.3.2",
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "http-errors": "^1.8.1",
+    "mongoose": "^6.1.7"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

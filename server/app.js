@@ -1,6 +1,10 @@
 import 'dotenv/config'
-import express from 'express'
+import createError from 'http-errors'
 import cors from 'cors'
+import connect from './db/mongodb.js'
+import express from 'express'
+
+connect()
 
 const app = express()
 
@@ -16,12 +20,7 @@ const init = async () =>
 await init(app)
 
 // catch 404 and forward to error handler
-app.use((req, res, next) => {
-  const error = new Error()
-  error.status = 404
-  error.message = 'Not found'
-  next(error)
-})
+app.use((req, res, next) => next(createError(404, 'Not found')))
 
 // handle error
 app.use((err, req, res, next) => {
@@ -30,7 +29,4 @@ app.use((err, req, res, next) => {
   res.json(req.app.get('env') === 'development' ? err : {})
 })
 
-const port = process.env.PORT || 4000
-app.listen(port, () => {
-  console.log(`listening on ${port}`)
-})
+export default app
