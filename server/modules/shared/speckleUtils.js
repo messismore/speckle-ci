@@ -24,7 +24,7 @@ const speckleFetch = async (token, query) => {
       },
     }
   )
-
+  if (response.data.errors) console.log(response.data.errors)
   return response
 }
 
