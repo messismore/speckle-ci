@@ -1,4 +1,4 @@
-# speckleci-client
+# frontend
 
 ## Project setup
 ```

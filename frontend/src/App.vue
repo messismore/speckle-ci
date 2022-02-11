@@ -1,30 +1,40 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view />
+  <v-app>
+    <v-app-bar app color="primary" dark>
+      <div class="d-flex align-center">
+        <h3>Speckle CI</h3>
+      </div>
+      <v-spacer></v-spacer>
+
+      <v-btn
+        outlined
+        text
+        v-if="!isAuthenticated"
+        @click="$store.dispatch('redirectToAuth')"
+      >
+        <span class="mr-2">Login with Speckle</span>
+      </v-btn>
+      <v-btn outlined v-else @click="$store.dispatch('logout')">
+        Log out {{ $store.state.user.name }}
+      </v-btn>
+    </v-app-bar>
+
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+export default {
+  name: 'App',
+  computed: {
+    isAuthenticated() {
+      return this.$store.getters.isAuthenticated
+    },
+  },
+  data: () => ({
+    //
+  }),
 }
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
-</style>
+</script>
