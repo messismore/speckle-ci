@@ -12,13 +12,27 @@ const routes = [
     component: Home,
   },
   {
-    path: '/about',
-    name: 'About',
+    path: '/new',
+    name: 'Create New Workflow',
+
+    component: () =>
+      import(/* webpackChunkName: "editor" */ '../views/WorkflowEditor.vue'),
+  },
+  {
+    path: '/:workflow',
+    name: 'Workflow Detail',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () =>
-      import(/* webpackChunkName: "about" */ '../views/About.vue'),
+      import(/* webpackChunkName: "runs" */ '../views/WorkflowRuns.vue'),
+  },
+  {
+    path: '/:workflow/edit',
+    name: 'Edit Workflow',
+
+    component: () =>
+      import(/* webpackChunkName: "editor" */ '../views/WorkflowEditor.vue'),
   },
 ]
 
@@ -31,7 +45,8 @@ router.beforeEach(async (to, from, next) => {
   if (to.query.access_code) {
     // If the route contains an access code, exchange it
     try {
-      store.dispatch('exchangeAccessCode', to.query.access_code)
+      await store.dispatch('exchangeAccessCode', to.query.access_code)
+      await store.dispatch('getUser')
     } catch (err) {
       console.warn('exchange failed', err)
     }

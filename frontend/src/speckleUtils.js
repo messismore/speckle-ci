@@ -20,7 +20,6 @@ export const goToSpeckleAuthPage = () => {
   // Save challenge to localStorage
   localStorage.setItem(CHALLENGE, challenge)
   // Send user to auth page
-  // TODO: Why not constants?
   window.location = `${process.env.VUE_APP_SPECKLE_SERVER_URL}/authn/verify/${process.env.VUE_APP_SPECKLE_APP_ID}/${challenge}`
 }
 
@@ -73,12 +72,14 @@ export const speckleFetch = async (query) => {
     } catch (err) {
       console.error('API call failed', err)
     }
-  else
-    return Promise.reject('You are no longer logged in! (token does not exit)')
+  else return Promise.reject('Not logged in.')
 }
 
 export const getUserData = () => speckleFetch(userInfoQuery())
 
 export const searchStreams = (query) => speckleFetch(streamSearchQuery(query))
 
-export const listAllStreams = () => speckleFetch(streamListAllQuery())
+export const listAllStreams = () =>
+  speckleFetch(streamListAllQuery()).then(
+    (response) => response.data.streams.items
+  )

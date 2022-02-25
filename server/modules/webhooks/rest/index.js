@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import Workflow from '/app/modules/workflows/services/workflows.js'
+
 const router = Router()
 
 router.post('/', async (req, res, next) => {
@@ -7,7 +8,10 @@ router.post('/', async (req, res, next) => {
 
   try {
     const payload = JSON.parse(req.body.payload)
-    const workflow = Workflow.findOne({ webhookId: payload.webhook.id }).exec()
+    const workflow = await Workflow.findOne({
+      webhookId: payload.webhook.id,
+    }).exec()
+
     workflow.run()
   } catch (error) {
     console.log(error)

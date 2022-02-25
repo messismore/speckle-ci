@@ -1,25 +1,30 @@
-export const userIdQuery = () => `query {
-  user {
-    id
-  },
-}`
+import gql from 'graphql-tag'
 
-export const userStreamIdsQuery = ({ userId }) => `{
-  user(id: ${JSON.stringify(userId)}) {
-    streams {
+export const UserId = gql`
+  query UserId {
+    user {
+      id
+    }
+  }
+`
+
+export const UserStreamIds = gql`
+  query UserStreamIds {
+    streams(limit: 50) {
       items {
         id
       }
     }
   }
-}`
+`
 
-export const webhookTriggersQuery = ({ streamId, webhookId }) => `{
- stream(id: ${JSON.stringify(streamId)}) {
-   webhooks(id: ${JSON.stringify(webhookId)}) {
-     items {
-       triggers
-     }
-   }
- }
+export const WebhookTriggers = `query WebhookTriggers($streamId: String!,
+                                     $webhookId: String!) {
+  stream(id: $streamId) {
+    webhooks(id: $webhookId) {
+      items {
+        triggers
+      }
+    }
+  }
 }`

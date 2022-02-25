@@ -1,30 +1,34 @@
-export const registerWebhookMutation = ({
-  streamId,
-  url,
-  description,
-  triggers,
-  secret = '',
-  enabled = true,
-}) => `mutation {
-  webhookCreate(webhook: {
-    streamId: ${JSON.stringify(streamId)},
-    url: ${JSON.stringify(url)},
-    description: ${JSON.stringify(description)},
-    triggers: ${JSON.stringify(triggers)},
-    secret: ${JSON.stringify(secret)},
-    enabled: ${JSON.stringify(enabled)},
-  })
-}`
+import gql from 'graphql-tag'
 
-export const setWebhookTriggers = ({
-  streamId,
-  webhookId,
-  triggers,
-}) => `mutation {
-  webhookUpdate(
-    webhook: {
-      streamId: ${JSON.stringify(streamId)},
-      id: ${JSON.stringify(webhookId)},
-      triggers: ${JSON.stringify(triggers)}}
-  )
-}`
+export const CreateWebhook = gql`
+  mutation CreateWebhook(
+    $streamId: String!
+    $url: String!
+    $description: String
+    $triggers: [String]!
+    $secret: String
+    $enabled: Boolean
+  ) {
+    webhookCreate(
+      webhook: {
+        streamId: $streamId
+        url: $url
+        description: $description
+        triggers: $triggers
+        secret: $secret
+        enabled: $enabled
+      }
+    )
+  }
+`
+export const UpdateWebhook = gql`
+  mutation UpdateWebhook(
+    $streamId: String!
+    $webhookId: String!
+    $triggers: [String]!
+  ) {
+    webhookUpdate(
+      webhook: { streamId: $streamId, id: $webhookId, triggers: $triggers }
+    )
+  }
+`
