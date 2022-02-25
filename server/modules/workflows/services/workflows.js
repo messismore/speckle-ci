@@ -115,7 +115,13 @@ workflowSchema.methods.run = async function () {
   if (!this.recipe)
     throw new Error(`Workflow ${this.name} has no configured actions.`)
 
-  recipes[this.recipe](this)
+  this.lastStatus = 'pending'
+
+  const success = recipes[this.recipe](this)
+
+  this.lastStatus = success ? 'success' : 'error'
+  this.lastRun = Date.now()
+  this.save((error) => console.log(error))
 }
 
 export default mongoose.model('Workflow', workflowSchema)
