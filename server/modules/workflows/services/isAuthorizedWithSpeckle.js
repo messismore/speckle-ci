@@ -4,10 +4,10 @@ import getBearerToken from '/app/modules/shared/getBearerToken.js'
 const isAuthorizedWithSpeckle = async (req, res, next) => {
   try {
     // make sure it belongs to a user
-    const json = await fetchSpeckleUserId({ token: getBearerToken(req) })
+    const userId = await fetchSpeckleUserId({ token: getBearerToken(req) })
 
     // store user in req.locals
-    res.locals.authorizedSpeckleUserId = json.data.data.user.id
+    res.locals.authorizedSpeckleUserId = userId
     return next()
   } catch (error) {
     // if there is no token or Speckle didn't return a user Id we'll get a TypeError

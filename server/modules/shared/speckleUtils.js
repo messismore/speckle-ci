@@ -1,61 +1,90 @@
 import createError from 'http-errors'
-import axios from 'axios'
-import {
-  webhookTriggersQuery,
-  userIdQuery,
-  userStreamIdsQuery,
-} from './speckleQueries.js'
-import {
-  registerWebhookMutation,
-  setWebhookTriggers,
-} from './speckleMutations.js'
+import { GraphQLClient } from 'graphql-request'
+import { UserId, UserStreamIds, WebhookTriggers } from './speckleQueries.js'
+import { CreateWebhook, UpdateWebhook } from './speckleMutations.js'
 
-const speckleFetch = async (token, query) => {
+const endpoint = `${process.env.SPECKLE_SERVER_URL}/graphql`
+
+const graphQLClient = new GraphQLClient(endpoint)
+
+const speckleFetch = async ({ token, query, variables = null }) => {
   if (!token) throw createError(403, 'Missing auth token')
-  const response = await axios.post(
-    `${process.env.SPECKLE_SERVER_URL}/graphql`,
-    JSON.stringify({
-      query: query,
-    }),
-    {
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json',
-      },
+
+  try {
+    const data = await graphQLClient.request(query, variables, {
+      Authorization: 'Bearer ' + token,
+    })
+
+    return data
+  } catch (error) {
+    // Handle 403
+    if (
+      error.response?.errors?.some(
+        (error) => error.extensions.code === 'FORBIDDEN'
+      )
+    ) {
+      error.status = 403
+      error.message = 'No permission to access resource.'
     }
-  )
-  if (response.data.errors) console.log(response.data.errors)
-  return response
+    // Handle 404
+    if (
+      error.response?.errors?.some((error) =>
+        error.message.includes('not found')
+      )
+    ) {
+      error.status = 404
+      error.message = 'Resource not found'
+    }
+    // Handle 400
+    if (
+      error.response?.errors.some((error) =>
+        error.message.includes('Cannot read properties of undefined')
+      )
+    ) {
+      error.status = 400
+      error.message = 'Bad request'
+    }
+
+    throw error
+  }
 }
 
 // Returns the user ID associated with a token
-export const fetchSpeckleUserId = async ({ token }) =>
-  speckleFetch(token, userIdQuery())
+export const fetchSpeckleUserId = async ({ token }) => {
+  const data = await speckleFetch({ token, query: UserId })
+  return data.user.id
+}
 
 // Returns all stream IDs associated with a user
-export const fetchSpeckleUserStreamIds = async ({ token, userId }) =>
-  speckleFetch(token, userStreamIdsQuery({ userId: userId })).then((res) => {
-    if (!res.data.data.user) throw createError('404', 'User not found')
-    return res.data.data.user.streams.items.map((stream) => stream.id)
+export const fetchSpeckleUserStreamIds = async ({ token }) => {
+  const data = await speckleFetch({
+    token,
+    query: UserStreamIds,
   })
+
+  if (!data.streams?.items) {
+    return []
+  }
+
+  return data.streams.items.map((stream) => stream.id)
+}
 
 // Returns webhook's triggers
 export const fetchSpeckleWebhookTriggers = async ({
   token,
   streamId,
   webhookId,
-}) =>
-  speckleFetch(token, webhookTriggersQuery({ streamId, webhookId })).then(
-    (res) => {
-      if (!res.data.data.stream) throw createError('404', 'Stream not found')
-      if (!res.data.data.stream.webhooks.items[0])
-        throw createError('404', 'Webhook not found')
+}) => {
+  const data = await speckleFetch({
+    token,
+    query: WebhookTriggers,
+    variables: { streamId, webhookId },
+  })
 
-      return res.data.data.stream.webhooks.items.flatMap(
-        (webhook) => webhook.triggers
-      )
-    }
-  )
+  // @TODO: We should probably make sure the webhook actually exists. At this time we're simply returning an empty array which is misleading
+
+  return data.stream.webhooks.items.flatMap((webhook) => webhook.triggers)
+}
 
 export const registerSpeckleWebhook = async ({
   token,
@@ -65,18 +94,14 @@ export const registerSpeckleWebhook = async ({
   triggers,
   secret = '',
   enabled = true,
-}) =>
-  speckleFetch(
+}) => {
+  const data = await speckleFetch({
     token,
-    registerWebhookMutation({
-      streamId,
-      url,
-      description,
-      triggers,
-      secret,
-      enabled,
-    })
-  )
+    query: CreateWebhook,
+    variables: { streamId, url, description, triggers, secret, enabled },
+  })
+  return data.webhookCreate
+}
 
 // Sets webhook's triggers
 export const setSpeckleWebhookTriggers = async ({
@@ -84,11 +109,15 @@ export const setSpeckleWebhookTriggers = async ({
   streamId,
   webhookId,
   triggers,
-}) =>
-  speckleFetch(
+}) => {
+  const data = await speckleFetch({
     token,
-    setWebhookTriggers({ streamId, webhookId, triggers })
-  ).then((res) => {
-    if (!res.data.data.webhookUpdate) throw new Error('Failed to set triggers')
-    return res.data.data.webhookUpdate
+    query: UpdateWebhook,
+    variables: { streamId, webhookId, triggers },
   })
+
+  if (!data?.webhookUpdate)
+    throw new Error('Failed to set Speckle webhook triggers')
+
+  return data.webhookUpdate
+}
