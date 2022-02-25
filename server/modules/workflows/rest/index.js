@@ -11,12 +11,11 @@ router.use(isAuthorizedWithSpeckle)
 
 router.get('/', async (req, res, next) => {
   try {
-    res.json(
-      await Workflow.findByUserId({
-        token: getBearerToken(req),
-        userId: req.query.userId,
-      })
-    )
+    const workflows = await Workflow.findByUserId({
+      token: getBearerToken(req),
+      userId: req.query.userId,
+    })
+    res.json(workflows)
   } catch (error) {
     setResponseErrorCode(error)
     next(error)
@@ -29,7 +28,7 @@ router.post('/', async (req, res, next) => {
       token: getBearerToken(req),
       streamId: req.body.streamId,
       name: req.body.name,
-      triggers: body.triggers,
+      triggers: req.body.triggers,
     })
     res.status(200).json('OK')
   } catch (error) {

@@ -11,6 +11,7 @@ import areValidSpeckleTriggers from './areValidSpeckleWebhookTriggers.js'
 const recipes = {
   logRun: function (context) {
     console.log('Running workflow! ', context)
+    return Math.floor(Math.random() * 2)
   },
 }
 
@@ -19,10 +20,13 @@ const workflowSchema = new mongoose.Schema({
   description: String,
   webhookId: { type: String, required: true },
   streamId: { type: String, required: true },
-  speckleAuthToken: { type: String, required: true },
-  recipe: { type: String, default: 'logRun' },
+  speckleAuthToken: { type: String },
+  recipe: { type: [String], default: ['logRun'] },
   createdAt: { type: Date, default: Date.now() },
   updatedAt: Date,
+  runs: { type: [mongoose.ObjectId], ref: 'WorkflowRun' },
+  lastRun: Date,
+  lastStatus: String,
 })
 
 workflowSchema.statics.findByUserId = async function ({ token, userId }) {
@@ -54,17 +58,15 @@ workflowSchema.statics.create = async function ({
     url: `https://${process.env.APP_SERVER_URL}:${port}/webhooks`,
     description: `Workflow ${name}`,
     triggers,
-  }).then((res) => res.data.data.webhookCreate)
+  })
 
-  const workflow = await new this({
+  return new this({
     name,
     webhookId,
     streamId,
     speckleAuthToken: token,
     recipe,
   }).save()
-
-  return workflow
 }
 
 // We don't store triggers, since they can be changed over at Speckle
