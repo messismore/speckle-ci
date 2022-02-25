@@ -1,5 +1,6 @@
 export const userInfoQuery = () => `query {
   user {
+    id
     name
   },
   serverInfo {
@@ -23,6 +24,7 @@ export const streamSearchQuery = (search) => `query {
 export const streamListAllQuery = () => `query {
   streams {
     items {
+      id
       name
     }
   }

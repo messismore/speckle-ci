@@ -16,10 +16,7 @@ export default {
   },
   methods: {
     getStreams() {
-      if (this.$store.getters.isAuthenticated)
-        listAllStreams().then((response) => {
-          this.streams = response.data
-        })
+      if (this.$store.getters.isAuthenticated) listAllStreams()
     },
   },
 }
