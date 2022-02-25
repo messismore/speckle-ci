@@ -45,7 +45,7 @@ export default new Vuex.Store({
         context.commit('setUser', data.user)
         context.commit('setServerInfo', data.serverInfo)
       } catch (err) {
-        console.error(err)
+        console.log(err)
       }
     },
     redirectToAuth() {

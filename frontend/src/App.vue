@@ -1,26 +1,19 @@
 <template>
   <v-app>
-    <v-app-bar app color="primary" dark>
-      <div class="d-flex align-center">
-        <h3>Speckle CI</h3>
-      </div>
-      <v-spacer></v-spacer>
-
-      <v-btn
-        outlined
-        text
-        v-if="!isAuthenticated"
-        @click="$store.dispatch('redirectToAuth')"
-      >
-        <span class="mr-2">Login with Speckle</span>
-      </v-btn>
-      <v-btn outlined v-else @click="$store.dispatch('logout')">
+    <v-app-bar flat app elevate-on-scroll elevation="8" class="grey lighten-5">
+      <v-app-bar-title>
+        <router-link to="/" class="text-decoration-none"
+          ><h3>Speckle CI</h3></router-link
+        >
+      </v-app-bar-title>
+      <v-spacer />
+      <v-btn v-if="isAuthenticated" text @click="$store.dispatch('logout')">
         Log out {{ $store.state.user.name }}
       </v-btn>
     </v-app-bar>
 
-    <v-main>
-      <router-view />
+    <v-main class="grey lighten-5">
+      <v-container class="fill-height"> <router-view /> </v-container>
     </v-main>
   </v-app>
 </template>
@@ -33,8 +26,5 @@ export default {
       return this.$store.getters.isAuthenticated
     },
   },
-  data: () => ({
-    //
-  }),
 }
 </script>
