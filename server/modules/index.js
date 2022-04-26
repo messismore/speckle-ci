@@ -1,4 +1,4 @@
-const moduleDirs = ['./webhooks', './workflows']
+const moduleDirs = ['./webhooks', './workflows', './actions']
 
 export const init = async (app) => {
   console.log('Starting to initialise modules…')

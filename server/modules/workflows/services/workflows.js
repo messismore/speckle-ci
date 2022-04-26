@@ -7,13 +7,13 @@ import {
   setSpeckleWebhookTriggers,
 } from '/app/modules/shared/speckleUtils.js'
 import areValidSpeckleTriggers from './areValidSpeckleWebhookTriggers.js'
+import workflowRun from './workflowRuns.js'
 
-const recipes = {
-  logRun: function (context) {
-    console.log('Running workflow! ', context)
-    return Math.floor(Math.random() * 2)
-  },
-}
+const stepSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  action: { type: String, required: true },
+  inputs: { type: Map, of: [String] },
+})
 
 const workflowSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -21,12 +21,26 @@ const workflowSchema = new mongoose.Schema({
   webhookId: { type: String, required: true },
   streamId: { type: String, required: true },
   speckleAuthToken: { type: String },
-  recipe: { type: [String], default: ['logRun'] },
+  recipe: {
+    type: [stepSchema],
+  },
   createdAt: { type: Date, default: Date.now() },
   updatedAt: Date,
-  runs: { type: [mongoose.ObjectId], ref: 'WorkflowRun' },
-  lastRun: Date,
-  lastStatus: String,
+})
+
+workflowSchema.virtual('runs', {
+  ref: 'workflowRun',
+  localField: '_id',
+  foreignField: 'workflow',
+})
+
+workflowSchema.virtual('lastRun').get(async function () {
+  await this.populate({
+    path: 'runs',
+    sort: { createdAt: -1 },
+    options: { limit: 1 },
+  })
+  return this.runs[0]
 })
 
 workflowSchema.statics.findByUserId = async function ({ token, userId }) {
@@ -69,7 +83,7 @@ workflowSchema.statics.create = async function ({
   }).save()
 }
 
-// We don't store triggers, since they can be changed over at Speckle
+// We don't store triggers since they can be changed over at Speckle
 workflowSchema.methods.fetchTriggers = async function ({ token }) {
   return fetchSpeckleWebhookTriggers({
     token,
@@ -80,7 +94,7 @@ workflowSchema.methods.fetchTriggers = async function ({ token }) {
 
 workflowSchema.methods.setTriggers = async function ({ token, triggers }) {
   if (!areValidSpeckleTriggers(triggers))
-    throw createError(400, 'Unknown trigger')
+    throw createError(400, 'Illegal trigger')
 
   return setSpeckleWebhookTriggers({
     token,
@@ -111,17 +125,11 @@ workflowSchema.methods.delete = async function ({ token }) {
 }
 
 // Run Workflow
-workflowSchema.methods.run = async function () {
+workflowSchema.methods.run = async function (context) {
   if (!this.recipe)
     throw new Error(`Workflow ${this.name} has no configured actions.`)
 
-  this.lastStatus = 'pending'
-
-  const success = recipes[this.recipe](this)
-
-  this.lastStatus = success ? 'success' : 'error'
-  this.lastRun = Date.now()
-  this.save((error) => console.log(error))
+  return workflowRun.create({ workflow: this, context })
 }
 
 export default mongoose.model('Workflow', workflowSchema)

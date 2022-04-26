@@ -12,7 +12,13 @@ router.post('/', async (req, res, next) => {
       webhookId: payload.webhook.id,
     }).exec()
 
-    workflow.run()
+    const context = {
+      serverUrl: payload.server.canonicalUrl,
+      streamId: payload.streamId,
+      trigger: { webhook: payload },
+    }
+
+    workflow.run(context)
   } catch (error) {
     console.log(error)
   }
