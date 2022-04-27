@@ -129,6 +129,8 @@ workflowSchema.methods.run = async function (context) {
   if (!this.recipe)
     throw new Error(`Workflow ${this.name} has no configured actions.`)
 
+  context.token = this.speckleAuthToken
+
   return workflowRun.create({ workflow: this, context })
 }
 

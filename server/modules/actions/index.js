@@ -1,3 +1,4 @@
+import checkoutCommit from './services/checkoutCommit.js'
 import dummy from './services/dummy.js'
 
 export const init = async (app) => {
@@ -10,6 +11,7 @@ export const finalize = async () => {
 
 const actions = {
   dummy,
+  checkoutCommit,
 }
 
 export default actions

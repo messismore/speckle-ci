@@ -16,6 +16,7 @@ router.post('/', async (req, res, next) => {
       serverUrl: payload.server.canonicalUrl,
       streamId: payload.streamId,
       trigger: { webhook: payload },
+      commit: payload.event.data.commit,
     }
 
     workflow.run(context)
