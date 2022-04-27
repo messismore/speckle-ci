@@ -1,3 +1,4 @@
+import calculateCarbon from './services/calculateCarbon.js'
 import checkoutCommit from './services/checkoutCommit.js'
 import dummy from './services/dummy.js'
 
@@ -12,6 +13,7 @@ export const finalize = async () => {
 const actions = {
   dummy,
   checkoutCommit,
+  calculateCarbon,
 }
 
 export default actions
