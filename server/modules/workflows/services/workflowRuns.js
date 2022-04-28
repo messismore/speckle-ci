@@ -61,4 +61,4 @@ workflowRunSchema.methods.conclude = async function ({ status }) {
   this.save()
 }
 
-export default mongoose.model('workflowRun', workflowRunSchema)
+export default mongoose.model('WorkflowRun', workflowRunSchema)

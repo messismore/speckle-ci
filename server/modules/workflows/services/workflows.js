@@ -7,7 +7,7 @@ import {
   setSpeckleWebhookTriggers,
 } from '/app/modules/shared/speckleUtils.js'
 import areValidSpeckleTriggers from './areValidSpeckleWebhookTriggers.js'
-import workflowRun from './workflowRuns.js'
+import WorkflowRun from './workflowRuns.js'
 
 const stepSchema = new mongoose.Schema({
   id: { type: String, required: true },
@@ -29,7 +29,7 @@ const workflowSchema = new mongoose.Schema({
 })
 
 workflowSchema.virtual('runs', {
-  ref: 'workflowRun',
+  ref: 'WorkflowRun',
   localField: '_id',
   foreignField: 'workflow',
 })
@@ -131,7 +131,7 @@ workflowSchema.methods.run = async function (context) {
 
   context.token = this.speckleAuthToken
 
-  return workflowRun.create({ workflow: this, context })
+  return WorkflowRun.create({ workflow: this, context })
 }
 
 export default mongoose.model('Workflow', workflowSchema)
