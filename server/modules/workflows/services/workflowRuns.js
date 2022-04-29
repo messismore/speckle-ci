@@ -12,6 +12,7 @@ const workflowRunSchema = new mongoose.Schema({
     enum: ['pending', 'success', 'error'],
     default: 'pending',
   },
+  report: { type: String },
 })
 
 // Run the Workflow
@@ -41,8 +42,14 @@ const runWorkflow = async ({ workflowRun, context }) => {
   }
 
 
-  // save the results
-  workflowRun.conclude({ status })
+  // We currently support only one report per workflow, so we get the last result that generated one and use that.
+  const report = Object.values(workflowRun.results).reduce(
+    (previous, current) => (current.report ||= previous),
+    undefined
+  )
+
+  // Update the run with the result
+  workflowRun.conclude({ status, report })
 }
 
 // Kick off a new workflow run
@@ -55,8 +62,9 @@ workflowRunSchema.statics.create = async function ({ workflow, context }) {
 }
 
 // Update the workflowRun with the results
-workflowRunSchema.methods.conclude = async function ({ status }) {
+workflowRunSchema.methods.conclude = async function ({ status, report }) {
   this.status = status
+  this.report = report
   this.finishedAt = Date.now()
   this.save()
 }
