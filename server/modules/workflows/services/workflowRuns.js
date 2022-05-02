@@ -25,11 +25,15 @@ const runWorkflow = async ({ workflowRun, context }) => {
     await workflowRun.populate('workflow')
 
     // perform each action in the recipe
+    console.log(workflowRun.workflow.recipe)
     for (const step of workflowRun.workflow.recipe) {
       workflowRun.results = {
         ...workflowRun.results,
         [step.id]: await actions[step.action].run.bind(workflowRun)({
-          inputs: resolveInputs(step.inputs, workflowRun),
+          inputs: {
+            ...Object.fromEntries((step.options ??= {})),
+            ...resolveInputs((step.inputs ??= []), workflowRun),
+          },
           context,
         }),
       }
@@ -41,6 +45,7 @@ const runWorkflow = async ({ workflowRun, context }) => {
     status = 'error'
   }
 
+  console.log('RESULTS: ', await workflowRun.results)
 
   // We currently support only one report per workflow, so we get the last result that generated one and use that.
   const report = Object.values(workflowRun.results).reduce(

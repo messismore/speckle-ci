@@ -13,6 +13,7 @@ const stepSchema = new mongoose.Schema({
   id: { type: String, required: true },
   action: { type: String, required: true },
   inputs: { type: Map, of: [String] },
+  options: { type: Map, of: String },
 })
 
 const workflowSchema = new mongoose.Schema({
