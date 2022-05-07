@@ -1,6 +1,6 @@
 import actions from '/app/modules/actions/index.js'
 import mongoose from 'mongoose'
-import resolveInputs from './resolveInputs.js'
+import { resolveInputs, resolveOptions } from './resolve.js'
 
 const workflowRunSchema = new mongoose.Schema({
   runId: String,
@@ -23,6 +23,7 @@ const runWorkflow = async ({ workflowRun, context }) => {
   try {
     // get the associated workflow
     await workflowRun.populate('workflow')
+    workflowRun.context = context
 
     // perform each action in the recipe
     console.log(workflowRun.workflow.recipe)
@@ -31,7 +32,7 @@ const runWorkflow = async ({ workflowRun, context }) => {
         ...workflowRun.results,
         [step.id]: await actions[step.action].run.bind(workflowRun)({
           inputs: {
-            ...Object.fromEntries((step.options ??= {})),
+            ...resolveOptions((step.options ??= []), workflowRun),
             ...resolveInputs((step.inputs ??= []), workflowRun),
           },
           context,
