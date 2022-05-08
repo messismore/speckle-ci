@@ -144,6 +144,13 @@ workflowSchema.methods.run = async function (context) {
   if (!this.recipe)
     throw new Error(`Workflow ${this.name} has no configured actions.`)
 
+  // Branch names that start with 🤖 are created by Speckle Actions and thus ignored as triggers
+  if (/^🤖/u.test(context.commit.branchName)) {
+    console.log(
+      `${context.commit.branchName} belongs to Speckle Actions, ignored.`
+    )
+    return
+  }
 
   if (!meetsRunConditions({ context, conditions: this.conditions })) {
     console.log(`Workflow does not meet conditions: ${this.conditions}`)

@@ -1,5 +1,6 @@
 import calculateCarbon from './services/calculateCarbon.js'
 import checkoutCommit from './services/checkoutCommit.js'
+import checkSetback from './services/checkSetback.js'
 import dummy from './services/dummy.js'
 import webRequest from './services/webRequest.js'
 
@@ -12,9 +13,10 @@ export const finalize = async () => {
 }
 
 const actions = {
-  dummy,
-  checkoutCommit,
   calculateCarbon,
+  checkoutCommit,
+  checkSetback,
+  dummy,
   webRequest,
 }
 

@@ -1,6 +1,11 @@
 import createError from 'http-errors'
 import { GraphQLClient } from 'graphql-request'
-import { UserId, UserStreamIds, WebhookTriggers } from './speckleQueries.js'
+import {
+  BranchLastCommitMessage,
+  UserId,
+  UserStreamIds,
+  WebhookTriggers,
+} from './speckleQueries.js'
 import { CreateWebhook, UpdateWebhook } from './speckleMutations.js'
 
 const endpoint = `${process.env.SPECKLE_SERVER_URL}/graphql`
@@ -120,4 +125,18 @@ export const setSpeckleWebhookTriggers = async ({
     throw new Error('Failed to set Speckle webhook triggers')
 
   return data.webhookUpdate
+}
+
+export const fetchSpeckleBranchCommitMessage = async ({
+  token,
+  streamId,
+  branchName,
+}) => {
+  const data = await speckleFetch({
+    token,
+    query: BranchLastCommitMessage,
+    variables: { streamId, branchName },
+  })
+
+  return data.stream.branch.commits.items.shift().message
 }
