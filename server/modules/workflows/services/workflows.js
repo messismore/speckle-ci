@@ -7,6 +7,7 @@ import {
   setSpeckleWebhookTriggers,
 } from '/app/modules/shared/speckleUtils.js'
 import areValidSpeckleTriggers from './areValidSpeckleWebhookTriggers.js'
+import meetsRunConditions from './meetsRunConditions.js'
 import WorkflowRun from './workflowRuns.js'
 
 const stepSchema = new mongoose.Schema({
@@ -22,6 +23,7 @@ const workflowSchema = new mongoose.Schema({
   webhookId: { type: String, required: true },
   streamId: { type: String, required: true },
   speckleAuthToken: { type: String },
+  conditions: { branches: { type: [String] }, apps: { type: [String] } },
   recipe: {
     type: [stepSchema],
   },
@@ -58,6 +60,7 @@ workflowSchema.statics.create = async function ({
   streamId,
   name,
   triggers,
+  conditions,
   recipe,
 }) {
   if (!areValidSpeckleTriggers(triggers))
@@ -80,6 +83,7 @@ workflowSchema.statics.create = async function ({
     webhookId,
     streamId,
     speckleAuthToken: token,
+    conditions,
     recipe,
   }).save()
 }
@@ -113,9 +117,19 @@ workflowSchema.methods.update = async function ({
   webhookId,
   streamId,
   triggers,
+  conditions,
   recipe,
 }) {
-  console.log(token, name, description, webhookId, streamId, triggers, recipe)
+  console.log(
+    token,
+    name,
+    description,
+    webhookId,
+    streamId,
+    triggers,
+    conditions,
+    recipe
+  )
   throw new Error('Not implemented yet')
 }
 
@@ -129,6 +143,12 @@ workflowSchema.methods.delete = async function ({ token }) {
 workflowSchema.methods.run = async function (context) {
   if (!this.recipe)
     throw new Error(`Workflow ${this.name} has no configured actions.`)
+
+
+  if (!meetsRunConditions({ context, conditions: this.conditions })) {
+    console.log(`Workflow does not meet conditions: ${this.conditions}`)
+    return
+  }
 
   context.token = this.speckleAuthToken
 

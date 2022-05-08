@@ -29,6 +29,7 @@ router.post('/', async (req, res, next) => {
       streamId: req.body.streamId,
       name: req.body.name,
       triggers: req.body.triggers,
+      conditions: req.body.conditions,
     })
     res.status(200).json('OK')
   } catch (error) {
