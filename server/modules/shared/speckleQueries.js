@@ -33,7 +33,7 @@ export const UserStreamIds = gql`
 `
 
 export const WebhookTriggers = `query WebhookTriggers($streamId: String!,
-                                     $webhookId: String!) {
+$webhookId: String!) {
   stream(id: $streamId) {
     webhooks(id: $webhookId) {
       items {
