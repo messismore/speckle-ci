@@ -4,7 +4,7 @@ import { resolveInputs, resolveOptions } from './resolve.js'
 
 const workflowRunSchema = new mongoose.Schema({
   runId: String,
-  workflow: { type: mongoose.ObjectId, ref: 'Workflow', required: true },
+  workflow: { type: mongoose.Types.ObjectId, ref: 'Workflow', required: true },
   createdAt: { type: Date, default: Date.now() },
   finishedAt: Date,
   status: {
