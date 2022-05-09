@@ -17,19 +17,23 @@ const stepSchema = new mongoose.Schema({
   options: { type: Map, of: String },
 })
 
-const workflowSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: String,
-  webhookId: { type: String, required: true },
-  streamId: { type: String, required: true },
-  speckleAuthToken: { type: String },
-  conditions: { branches: { type: [String] }, apps: { type: [String] } },
-  recipe: {
-    type: [stepSchema],
+const workflowSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    description: String,
+    webhookId: { type: String, required: true },
+    streamId: { type: String, required: true },
+    speckleAuthToken: { type: String },
+    conditions: { branches: { type: [String] }, apps: { type: [String] } },
+    recipe: {
+      type: [stepSchema],
+    },
+    createdAt: { type: Date, default: Date.now() },
+    updatedAt: Date,
   },
-  createdAt: { type: Date, default: Date.now() },
-  updatedAt: Date,
-})
+  { toJSON: { virtuals: true } },
+  { toObject: { virtuals: true } }
+)
 
 workflowSchema.virtual('runs', {
   ref: 'WorkflowRun',
@@ -37,20 +41,20 @@ workflowSchema.virtual('runs', {
   foreignField: 'workflow',
 })
 
-workflowSchema.virtual('lastRun').get(async function () {
-  await this.populate({
-    path: 'runs',
-    sort: { createdAt: -1 },
-    options: { limit: 1 },
-  })
-  return this.runs[0]
+workflowSchema.virtual('lastRun', {
+  ref: 'WorkflowRun',
+  localField: '_id',
+  foreignField: 'workflow',
+  justOne: true,
+  options: { sort: { createdAt: -1 }, limit: 1 },
 })
 
 workflowSchema.statics.findByUserId = async function ({ token, userId }) {
   return this.find({
     streamId: await fetchSpeckleUserStreamIds({ token: token, userId: userId }),
   })
-    .select('-__v') // don't return version key https://mongoosejs.com/docs/guide.html#versionKey
+    .select(['-recipe', '-speckleAuthToken', '-__v']) // don't return version key https://mongoosejs.com/docs/guide.html#versionKey
+    .populate('lastRun', ['createdAt', 'finishedAt', 'status'])
     .exec()
 }
 
