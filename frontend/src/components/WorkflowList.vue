@@ -24,23 +24,28 @@
         >
           <v-list-item to="workflow._id">
             <v-list-item-icon>
+              <v-icon v-if="!workflow.lastRun" color="info">
+                mdi-circle-outline
+              </v-icon>
               <v-progress-circular
-                v-if="workflow.inProgress"
+                v-else-if="workflow.lastRun.status == 'pending'"
                 indeterminate
                 size="20"
                 width="3"
                 color="primary"
               />
               <v-icon
-                v-else-if="workflow.lastStatus == 'success'"
+                v-else-if="workflow.lastRun.status == 'success'"
                 color="success"
               >
                 mdi-check-circle
               </v-icon>
-              <v-icon v-else-if="workflow.lastStatus == 'error'" color="error">
+              <v-icon
+                v-else-if="workflow.lastRun.status == 'error'"
+                color="error"
+              >
                 mdi-close-circle
               </v-icon>
-              <v-icon v-else color="info"> mdi-circle-outline </v-icon>
             </v-list-item-icon>
 
             <v-list-item-content>
@@ -50,14 +55,14 @@
             <v-list-item-content>
               <v-list-item-subtitle>
                 {{
-                  workflow.lastRun === 'pending'
+                  !workflow.lastRun
+                    ? 'Never run'
+                    : !workflow.lastRun.finishedAt
                     ? 'In Progress'
-                    : workflow.lastRun
-                    ? workflow.lastRun
+                    : workflow.lastRun.finishedAt
                         .slice(0, 16)
                         .replaceAll('T', ' ')
                         .replaceAll('-', '.')
-                    : 'Never run'
                 }}
               </v-list-item-subtitle>
             </v-list-item-content>
@@ -104,8 +109,9 @@ export default {
             },
           })
           .then((response) => {
-            this.workflows = response.data.sort((a, b) =>
-              !a.lastRun ? 1 : a.lastRun > b.lastRun ? -1 : 1
+            this.workflows = response.data.sort(
+              (a, b) =>
+                (b.lastRun?.createdAt ?? -1) - (a.lastRun?.createdAt ?? -1)
             )
           })
           .catch((error) => {
