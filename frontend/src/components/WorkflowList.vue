@@ -22,31 +22,14 @@
           v-for="(workflow, i) in workflows"
           :key="i /* sort by lastRun > name > i */"
         >
-          <v-list-item to="workflow._id">
-            <v-list-item-icon>
-              <v-icon v-if="!workflow.lastRun" color="info">
-                mdi-circle-outline
-              </v-icon>
-              <v-progress-circular
-                v-else-if="workflow.lastRun.status == 'pending'"
-                indeterminate
-                size="20"
-                width="3"
-                color="primary"
-              />
-              <v-icon
-                v-else-if="workflow.lastRun.status == 'success'"
-                color="success"
-              >
-                mdi-check-circle
-              </v-icon>
-              <v-icon
-                v-else-if="workflow.lastRun.status == 'error'"
-                color="error"
-              >
-                mdi-close-circle
-              </v-icon>
-            </v-list-item-icon>
+          <v-list-item :to="workflow._id">
+            <JobStatusIcon
+              :status="
+                workflow.lastRun
+                  ? workflow.lastRun.status
+                  : undefined /* no optional chaining in Vue2 */
+              "
+            />
 
             <v-list-item-content>
               <v-list-item-title v-text="workflow.name" />
@@ -81,8 +64,11 @@
 
 <script>
 import axios from 'axios'
+import JobStatusIcon from '@/components/JobStatusIcon.vue'
+
 export default {
   name: 'WorkflowList',
+  components: { JobStatusIcon },
 
   data() {
     return {
