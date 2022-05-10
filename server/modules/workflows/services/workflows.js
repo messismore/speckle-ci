@@ -54,7 +54,7 @@ workflowSchema.statics.findByUserId = async function ({ token, userId }) {
     streamId: await fetchSpeckleUserStreamIds({ token: token, userId: userId }),
   })
     .select(['-recipe', '-speckleAuthToken', '-__v']) // don't return version key https://mongoosejs.com/docs/guide.html#versionKey
-    .populate('lastRun', ['createdAt', 'finishedAt', 'status'])
+    .populate('lastRun', ['createdAt', 'finishedAt', 'status', 'triggerEvent'])
     .exec()
 }
 

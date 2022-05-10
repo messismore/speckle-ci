@@ -50,6 +50,21 @@
               </v-list-item-subtitle>
             </v-list-item-content>
 
+            <v-list-item-content>
+              <v-list-item-subtitle
+                v-text="
+                  (workflow.lastRun && workflow.lastRun.triggerEvent
+                    ? `${workflow.lastRun.triggerEvent.eventName}: `
+                    : '') +
+                  (workflow.lastRun &&
+                  workflow.lastRun.triggerEvent &&
+                  workflow.lastRun.triggerEvent.commit
+                    ? workflow.lastRun.triggerEvent.commit.message
+                    : '')
+                "
+              />
+            </v-list-item-content>
+
             <v-list-item-action>
               <v-btn small depressed outlined :to="`${workflow._id}/edit`">
                 Edit

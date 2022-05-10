@@ -6,6 +6,15 @@ const workflowRunSchema = new mongoose.Schema({
   runId: String,
   workflow: { type: mongoose.Types.ObjectId, ref: 'Workflow', required: true },
   createdAt: { type: Date, default: Date.now() },
+  triggerEvent: {
+    eventName: String,
+    commit: {
+      id: String,
+      streamId: String,
+      message: String,
+      branchName: String,
+    },
+  },
   finishedAt: Date,
   status: {
     type: String,
@@ -26,7 +35,7 @@ const runWorkflow = async ({ workflowRun, context }) => {
     workflowRun.context = context
 
     // perform each action in the recipe
-    console.log(workflowRun.workflow.recipe)
+    console.log('workflowRun: ', workflowRun)
     for (const step of workflowRun.workflow.recipe) {
       workflowRun.results = {
         ...workflowRun.results,
@@ -60,7 +69,13 @@ const runWorkflow = async ({ workflowRun, context }) => {
 
 // Kick off a new workflow run
 workflowRunSchema.statics.create = async function ({ workflow, context }) {
-  const workflowRun = await this({ workflow: workflow._id })
+  const workflowRun = await this({
+    workflow: workflow._id,
+    triggerEvent: {
+      eventName: context.trigger?.webhook?.event?.event_name,
+      commit: context.commit,
+    },
+  })
   workflowRun.save((error) => {
     console.log(error)
     runWorkflow({ workflowRun, context })
