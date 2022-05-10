@@ -3,6 +3,7 @@ import { Router } from 'express'
 import getBearerToken from '/app/modules/shared/getBearerToken.js'
 import isAuthorizedWithSpeckle from '../services/isAuthorizedWithSpeckle.js'
 import Workflow from '../services/workflows.js'
+import WorkflowRuns from '../services/workflowRuns.js'
 import setResponseErrorCode from './setResponseErrorCode.js'
 
 const router = Router()
@@ -64,5 +65,20 @@ router.patch('/:workflowId', (req, res, next) =>
 router.delete('/:workflowId', (req, res, next) =>
   next(createError(501, 'Not Implemented'))
 )
+
+router.get('/:workflowId/runs', async (req, res, next) => {
+  try {
+    const runs = await WorkflowRuns.find({
+      workflow: req.params.workflowId,
+    })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .exec()
+    res.json(runs)
+  } catch (error) {
+    setResponseErrorCode(error)
+    next(error)
+  }
+})
 
 export default router
