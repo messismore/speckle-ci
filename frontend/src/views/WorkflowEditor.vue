@@ -13,7 +13,7 @@
             <v-col
               class="d-flex flex-row-reverse flex-wrap flex-sm-nowrap pb-0"
             >
-              <div class="cancel-undo-save flex-grow-1 d-flex flex-nowrap">
+              <div class="cancel-undo-save mt-5 flex-grow-1 d-flex flex-nowrap">
                 <div class="mr-3 d-flex flex-nowrap">
                   <v-tooltip top color="black">
                     <template v-slot:activator="{ on, attrs }">
@@ -440,9 +440,10 @@ export default {
   width: 100%;
 }
 
-.workflow-editor div.v-text-field__slot {
+.workflow-editor .name div.v-text-field__slot input {
   font-size: 2.125rem;
   padding-bottom: 0.5rem;
+  min-height: 48px;
 }
 .workflow-editor .name input::placeholder {
   color: rgba(0, 0, 0, 0.87) !important;
