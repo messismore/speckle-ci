@@ -36,10 +36,10 @@ export default {
       mode: 'cors',
       cache: 'no-cache',
       headers: JSON.parse(
-        (inputs.header ??= "{ 'Content-Type': 'application/json' }")
+        (inputs.header ??= '{ "Content-Type": "application/json" }')
       ),
       redirect: 'follow',
-      body: (inputs.body ??= '{}'),
+      body: inputs.body,
     })
 
     return { 'Server Response': response.statusText }
