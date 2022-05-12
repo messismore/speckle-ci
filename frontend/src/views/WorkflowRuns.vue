@@ -7,7 +7,9 @@
             <v-card-title>{{ workflowName }}</v-card-title>
             <v-spacer></v-spacer>
             <v-card-actions>
-              <v-btn depressed color="primary"> Edit workflow </v-btn>
+              <v-btn depressed color="primary" :to="$route.path + '/edit'">
+                Edit workflow
+              </v-btn>
             </v-card-actions>
           </v-row>
           <v-divider />

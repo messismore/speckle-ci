@@ -48,7 +48,7 @@
                         color="primary"
                         :disabled="!canBeSaved"
                         v-bind="attrs"
-                        @click="registerWorkflow"
+                        @click="saveWorkflow"
                       >
                         Save
                       </v-btn>
@@ -224,6 +224,7 @@ export default {
   name: 'WorkflowEditor',
   components: { ActionStore },
   props: {
+    workflowId: null,
   },
   data() {
     return {
@@ -326,6 +327,28 @@ export default {
     this.loading = false
   },
   methods: {
+    async fetchWorkflow() {
+      const token = localStorage.getItem(
+        `${process.env.VUE_APP_SPECKLE_APP_NAME}.AuthToken`
+      )
+      if (token && this.$store.getters.isAuthenticated) {
+        // Get the name of the workflow
+        axios
+          .get(`${process.env.VUE_APP_REST}/workflows/${this.workflowId}`, {
+            headers: {
+              Authorization: 'Bearer ' + token,
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((response) => {
+            this.workflow = this.decompileWorkflow(response.data)
+          })
+          .catch((error) => {
+            console.log(error)
+            this.errored = true
+          })
+      }
+    },
     removeAction(i) {
       this.workflow.recipe.splice(i, 1)
     },
@@ -356,23 +379,38 @@ export default {
         })),
       }
     },
-    async registerWorkflow() {
+    decompileWorkflow(workflow) {
+      workflow.recipe = workflow.recipe.map((step) => {
+        const action = this.$store.state.actions
+          .filter((action) => action.action === step.action)
+          .pop()
+        return {
+          ...action,
+          options: action.options.map((option) => ({
+            ...option,
+            value: step.options[option.id],
+          })),
+        }
+      })
+      return workflow
+    },
+    async saveWorkflow() {
       // Make a request to our backend
       const token = localStorage.getItem(
         `${process.env.VUE_APP_SPECKLE_APP_NAME}.AuthToken`
       )
       if (token && this.$store.getters.isAuthenticated) {
-        axios
-          .post(
-            `${process.env.VUE_APP_REST}/workflows`,
-            this.compileWorkflow(),
-            {
-              headers: {
-                Authorization: 'Bearer ' + token,
-                'Content-Type': 'application/json',
-              },
-            }
-          )
+        axios({
+          url: `/workflows/${this.workflowId ?? ''}`,
+          baseURL: process.env.VUE_APP_REST,
+          method: this.workflowId ? 'patch' : 'post',
+          data: this.compileWorkflow(),
+
+          headers: {
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json',
+          },
+        })
           .then((response) => {
             console.log(response)
             if (response.status == 200)

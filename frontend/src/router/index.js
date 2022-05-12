@@ -8,19 +8,18 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'home',
     component: Home,
   },
   {
     path: '/new',
-    name: 'Create New Workflow',
-
+    name: 'new',
     component: () =>
       import(/* webpackChunkName: "editor" */ '../views/WorkflowEditor.vue'),
   },
   {
-    path: '/:workflow',
-    name: 'Workflow Detail',
+    path: '/:workflowId',
+    name: 'detail',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
@@ -28,9 +27,9 @@ const routes = [
       import(/* webpackChunkName: "runs" */ '../views/WorkflowRuns.vue'),
   },
   {
-    path: '/:workflow/edit',
-    name: 'Edit Workflow',
-
+    path: '/:workflowId/edit',
+    name: 'edit',
+    props: true,
     component: () =>
       import(/* webpackChunkName: "editor" */ '../views/WorkflowEditor.vue'),
   },
