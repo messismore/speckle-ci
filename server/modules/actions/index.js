@@ -1,3 +1,5 @@
+import routes from './rest/index.js'
+/* Actions */
 import calculateCarbon from './services/calculateCarbon.js'
 import checkoutCommit from './services/checkoutCommit.js'
 import checkSetback from './services/checkSetback.js'
@@ -6,6 +8,7 @@ import webRequest from './services/webRequest.js'
 
 export const init = async (app) => {
   console.log('Initialising actions ')
+  app.use('/actions/', routes)
 }
 
 export const finalize = async () => {
