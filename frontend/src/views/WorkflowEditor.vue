@@ -1,5 +1,11 @@
 <template>
   <v-container class="workflow-editor fill-height py-5">
+    <v-progress-linear
+      v-if="loading"
+      class="toploader"
+      indeterminate
+      color="accent"
+    />
     <v-row justify="center">
       <v-col sm="10" md="8">
         <v-form v-model="valid">
@@ -307,7 +313,17 @@ export default {
     },
   },
   async mounted() {
-    this.streams = await listAllStreams()
+    // Wait for everything to load
+    await Promise.all([
+      (async () => {
+        this.streams = await listAllStreams()
+      })(),
+      (async () => {
+        if (this.workflowId) this.fetchWorkflow()
+      })(),
+      this.$store.dispatch('getActions'),
+    ])
+
     this.loading = false
   },
   methods: {
@@ -353,6 +369,13 @@ export default {
 </script>
 
 <style>
+.workflow-editor .toploader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6; /* v-app-bar is 5 */
+}
 .workflow-editor .name {
   width: 100%;
 }
