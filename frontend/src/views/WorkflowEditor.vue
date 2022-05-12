@@ -239,10 +239,11 @@ export default {
       },
 
       actionStore: false,
+      valid: true,
       nameRules: [
         (v) => !!v || 'Required',
-        (v) => v.length > 3 || 'Name must be more than 3 characters',
-        (v) => v.length < 50 || 'Name must be less than 50 characters',
+        (v) => (v ?? []).length > 3 || 'Name must be more than 3 characters',
+        (v) => (v ?? []).length < 50 || 'Name must be less than 50 characters',
       ],
       streams: [],
       validTriggers: [
