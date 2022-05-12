@@ -109,7 +109,7 @@ export default {
         // Get the name of the workflow
         axios
           .get(
-            `${process.env.VUE_APP_REST}/workflows/${this.$route.params.workflow}`,
+            `${process.env.VUE_APP_REST}/workflows/${this.$route.params.workflowId}`,
             {
               params: { userId: this.$store.state.user.id },
               headers: {
@@ -128,7 +128,7 @@ export default {
         // Get the runs
         axios
           .get(
-            `${process.env.VUE_APP_REST}/workflows/${this.$route.params.workflow}/runs`,
+            `${process.env.VUE_APP_REST}/workflows/${this.$route.params.workflowId}/runs`,
             {
               params: { userId: this.$store.state.user.id },
               headers: {

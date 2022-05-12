@@ -39,7 +39,7 @@ const runWorkflow = async ({ workflowRun, context }) => {
     for (const step of workflowRun.workflow.recipe) {
       workflowRun.results = {
         ...workflowRun.results,
-        [step.id]: await actions[step.action].run.bind(workflowRun)({
+        [step.instanceId]: await actions[step.action].run.bind(workflowRun)({
           inputs: {
             ...resolveOptions((step.options ??= []), workflowRun),
             ...resolveInputs((step.inputs ??= []), workflowRun),

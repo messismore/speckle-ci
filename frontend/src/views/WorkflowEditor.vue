@@ -148,6 +148,7 @@
                     <!--  Hacky for now -->
                     <v-select
                       v-if="option.type === 'SELECT'"
+                      v-model="option.value"
                       dense
                       filled
                       outlined
@@ -164,6 +165,7 @@
                     />
                     <v-text-field
                       v-if="option.type === 'TEXT'"
+                      v-model="option.value"
                       dense
                       filled
                       outlined
@@ -172,6 +174,7 @@
                     />
                     <v-textarea
                       v-if="option.type === 'MULTILINE'"
+                      v-model="option.value"
                       dense
                       filled
                       outlined
@@ -221,23 +224,19 @@ export default {
   name: 'WorkflowEditor',
   components: { ActionStore },
   props: {
-    workflow: {
-      type: Object,
-      default: () => {
-        return {
-          name: null,
-          streamId: null,
-          triggers: [],
-          conditions: [],
-          recipe: [],
-        } // Objects and arrays require factory functions
-      },
-    },
   },
   data() {
     return {
       loading: true,
       errored: false,
+      workflow: {
+        name: null,
+        streamId: null,
+        triggers: [],
+        conditions: { apps: [], branches: [] },
+        recipe: [],
+      },
+
       actionStore: false,
       nameRules: [
         (v) => !!v || 'Required',
@@ -330,6 +329,33 @@ export default {
     removeAction(i) {
       this.workflow.recipe.splice(i, 1)
     },
+    compileWorkflow() {
+      return {
+        ...this.workflow,
+        recipe: this.workflow.recipe.map((step, i, recipe) => ({
+          action: step.action,
+          instanceId: step.instanceId,
+          options: step.options
+            .map((option) =>
+              !option.type && !option.value && recipe[i - 1]
+                ? {
+                    value: `\${results.${recipe[i - 1].instanceId}.${
+                      recipe[i - 1].outputs[0].name
+                    }}`,
+                    ...option,
+                  }
+                : option
+            )
+            .reduce(
+              (previous, current) => ({
+                [current.id]: current.value,
+                ...previous,
+              }),
+              {}
+            ),
+        })),
+      }
+    },
     async registerWorkflow() {
       // Make a request to our backend
       const token = localStorage.getItem(
@@ -339,11 +365,7 @@ export default {
         axios
           .post(
             `${process.env.VUE_APP_REST}/workflows`,
-            {
-              streamId: this.workflow.streamId,
-              name: this.workflow.name,
-              triggers: this.workflow.triggers,
-            },
+            this.compileWorkflow(),
             {
               headers: {
                 Authorization: 'Bearer ' + token,

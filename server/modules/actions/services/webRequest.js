@@ -4,7 +4,7 @@ export default {
   name: 'Call a Web API',
   description: 'Make a HTTP request to a web endpoint.',
   icon: 'mdi-radio-tower',
-  arguments: [
+  options: [
     {
       type: 'SELECT',
       id: 'method',

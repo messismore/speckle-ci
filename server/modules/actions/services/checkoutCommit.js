@@ -4,8 +4,8 @@ import ObjectLoader from '@speckle/objectloader'
 export default {
   name: 'Checkout Commit',
   description: 'Get the contents of a commit from Speckle.',
-  icon: 'mdi-timeline-check-outline',
-  inputs: [],
+  icon: 'mdi-timeline-text-outline',
+  options: [],
   outputs: [{ name: 'Speckle Data' }],
   run: async ({ context }) => {
     console.log(

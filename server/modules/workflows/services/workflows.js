@@ -11,7 +11,7 @@ import meetsRunConditions from './meetsRunConditions.js'
 import WorkflowRun from './workflowRuns.js'
 
 const stepSchema = new mongoose.Schema({
-  id: { type: String, required: true },
+  instanceId: { type: String, required: true },
   action: { type: String, required: true },
   inputs: { type: Map, of: [String] },
   options: { type: Map, of: String },

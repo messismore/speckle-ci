@@ -19,7 +19,12 @@ export const resolveInputs = (inputs, workflowRun) =>
 */
 export const resolveOptions = (options, workflowRun) =>
   mapMapValues(options, (v) =>
-    v.replace(/\$\{(.+?)\}/g, (_, p1) =>
-      resolveObjectReference(p1.split('.'), workflowRun)
-    )
+    // If it's a single reference like '${path.to.thing}'
+    RegExp(/^(\${).*(})$/).test(v)
+      ? // just return the thing
+        resolveObjectReference(v.slice(2, -1).split('.'), workflowRun)
+      : // else replace in the string
+        v.replace(/\$\{(.+?)\}/g, (_, p1) =>
+          resolveObjectReference(p1.split('.'), workflowRun)
+        )
   )

@@ -4,7 +4,7 @@ export default {
   name: 'Test Setbacks',
   description: 'Check if volumes follows envelope restrictions.',
   icon: 'mdi-domain',
-  arguments: [],
+  options: [],
   outputs: [],
   run: async ({ inputs, context }) => {
     /*

@@ -5,6 +5,7 @@ import isAuthorizedWithSpeckle from '../services/isAuthorizedWithSpeckle.js'
 import Workflow from '../services/workflows.js'
 import WorkflowRuns from '../services/workflowRuns.js'
 import setResponseErrorCode from './setResponseErrorCode.js'
+import actions from '/app/modules/actions/index.js'
 
 const router = Router()
 
@@ -27,10 +28,7 @@ router.post('/', async (req, res, next) => {
   try {
     await Workflow.create({
       token: getBearerToken(req),
-      streamId: req.body.streamId,
-      name: req.body.name,
-      triggers: req.body.triggers,
-      conditions: req.body.conditions,
+      ...req.body,
     })
     res.status(200).json('OK')
   } catch (error) {
@@ -51,7 +49,16 @@ router.get('/:workflowId', async (req, res, next) => {
       token: getBearerToken(req),
     })
 
-    res.json({ ...workflow.toJSON(), triggers })
+    // ugly hack, for now…
+    res.json({
+      ...workflow.toJSON(),
+      recipe: workflow.toJSON().recipe.map((step) => ({
+        name: actions[step.action].name,
+        icon: actions[step.action].icon,
+        ...step,
+      })),
+      triggers,
+    })
   } catch (error) {
     setResponseErrorCode(error)
     next(error)

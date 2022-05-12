@@ -2,7 +2,7 @@ export default {
   name: 'Generate Carbon Report',
   description: "Return the tally of the structure's embodied energy in GWP.",
   icon: 'mdi-leaf',
-  arguments: [
+  options: [
     {
       id: 'model',
     },

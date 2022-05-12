@@ -26,6 +26,8 @@
 </template>
 
 <script>
+import { v4 as uuidv4 } from 'uuid'
+
 export default {
   name: 'ActionStore',
   props: {
@@ -48,8 +50,8 @@ export default {
   },
   methods: {
     pushAction(action) {
-      this.recipe.push(action)
-      this.$emit('choseAction', action)
+      this.recipe.push(Object.assign({ instanceId: uuidv4() }, action))
+      this.$emit('choseAction')
     },
   },
 }
