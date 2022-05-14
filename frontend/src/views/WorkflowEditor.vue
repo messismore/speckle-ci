@@ -138,13 +138,23 @@
                   rounded="lg"
                   class="action mx-5 my-8"
                 >
-                  <v-card-title class="text-subtitle-1 font-weight-regular">
+                  <v-card-title
+                    class="text-subtitle-1 font-weight-regular mb-3"
+                  >
+                    <v-icon class="mr-4">
+                      {{ action.icon ? action.icon : 'mdi-robot' }}
+                    </v-icon>
                     {{ action.name }} <v-spacer />
                     <v-btn icon @click="removeAction(i)">
                       <v-icon> mdi-close-circle </v-icon>
                     </v-btn>
                   </v-card-title>
-                  <v-card-text v-for="(option, i) in action.options" :key="i">
+                  <v-card-text
+                    v-for="(option, i) in action.options.filter(
+                      (option) => option.type
+                    )"
+                    :key="i"
+                  >
                     <!--  Hacky for now -->
                     <v-select
                       v-if="option.type === 'SELECT'"

@@ -23,7 +23,10 @@
             </div>
 
             <v-list flat>
-              <v-card-subtitle v-if="!runs || !runs.length" justify="center">
+              <v-card-subtitle
+                v-if="!loading && (!runs || !runs.length)"
+                justify="center"
+              >
                 <p>This workflow has not run yet</p>
               </v-card-subtitle>
               <v-list-item-group
