@@ -22,26 +22,14 @@
           v-for="(workflow, i) in workflows"
           :key="i /* sort by lastRun > name > i */"
         >
-          <v-list-item to="workflow._id">
-            <v-list-item-icon>
-              <v-progress-circular
-                v-if="workflow.inProgress"
-                indeterminate
-                size="20"
-                width="3"
-                color="primary"
-              />
-              <v-icon
-                v-else-if="workflow.lastStatus == 'success'"
-                color="success"
-              >
-                mdi-check-circle
-              </v-icon>
-              <v-icon v-else-if="workflow.lastStatus == 'error'" color="error">
-                mdi-close-circle
-              </v-icon>
-              <v-icon v-else color="info"> mdi-circle-outline </v-icon>
-            </v-list-item-icon>
+          <v-list-item :to="workflow._id">
+            <JobStatusIcon
+              :status="
+                workflow.lastRun
+                  ? workflow.lastRun.status
+                  : undefined /* no optional chaining in Vue2 */
+              "
+            />
 
             <v-list-item-content>
               <v-list-item-title v-text="workflow.name" />
@@ -50,16 +38,31 @@
             <v-list-item-content>
               <v-list-item-subtitle>
                 {{
-                  workflow.lastRun === 'pending'
+                  !workflow.lastRun
+                    ? 'Never run'
+                    : !workflow.lastRun.finishedAt
                     ? 'In Progress'
-                    : workflow.lastRun
-                    ? workflow.lastRun
+                    : workflow.lastRun.finishedAt
                         .slice(0, 16)
                         .replaceAll('T', ' ')
                         .replaceAll('-', '.')
-                    : 'Never run'
                 }}
               </v-list-item-subtitle>
+            </v-list-item-content>
+
+            <v-list-item-content>
+              <v-list-item-subtitle
+                v-text="
+                  (workflow.lastRun && workflow.lastRun.triggerEvent
+                    ? `${workflow.lastRun.triggerEvent.eventName}: `
+                    : '') +
+                  (workflow.lastRun &&
+                  workflow.lastRun.triggerEvent &&
+                  workflow.lastRun.triggerEvent.commit
+                    ? workflow.lastRun.triggerEvent.commit.message
+                    : '')
+                "
+              />
             </v-list-item-content>
 
             <v-list-item-action>
@@ -76,8 +79,11 @@
 
 <script>
 import axios from 'axios'
+import JobStatusIcon from '@/components/JobStatusIcon.vue'
+
 export default {
   name: 'WorkflowList',
+  components: { JobStatusIcon },
 
   data() {
     return {
@@ -104,8 +110,9 @@ export default {
             },
           })
           .then((response) => {
-            this.workflows = response.data.sort((a, b) =>
-              !a.lastRun ? 1 : a.lastRun > b.lastRun ? -1 : 1
+            this.workflows = response.data.sort(
+              (a, b) =>
+                (b.lastRun?.createdAt ?? -1) - (a.lastRun?.createdAt ?? -1)
             )
           })
           .catch((error) => {

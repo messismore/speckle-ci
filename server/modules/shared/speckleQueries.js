@@ -1,5 +1,19 @@
 import gql from 'graphql-tag'
 
+export const BranchLastCommitMessage = gql`
+  query BranchNames($streamId: String!, $branchName: String!) {
+    stream(id: $streamId) {
+      branch(name: $branchName) {
+        commits(limit: 1) {
+          items {
+            message
+          }
+        }
+      }
+    }
+  }
+`
+
 export const UserId = gql`
   query UserId {
     user {
@@ -19,7 +33,7 @@ export const UserStreamIds = gql`
 `
 
 export const WebhookTriggers = `query WebhookTriggers($streamId: String!,
-                                     $webhookId: String!) {
+$webhookId: String!) {
   stream(id: $streamId) {
     webhooks(id: $webhookId) {
       items {

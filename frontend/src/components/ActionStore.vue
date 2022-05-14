@@ -1,5 +1,6 @@
 <template>
-  <v-card class="pa-5">
+  <v-progress-linear v-if="loading" indeterminate color="accent" />
+  <v-card v-else class="pa-5">
     <v-card-title>
       <h3 class="text-h6">Add an action</h3>
     </v-card-title>
@@ -25,6 +26,8 @@
 </template>
 
 <script>
+import { v4 as uuidv4 } from 'uuid'
+
 export default {
   name: 'ActionStore',
   props: {
@@ -32,77 +35,23 @@ export default {
   },
   data() {
     return {
-      // hardcoded for now, eventually provided by backend
-      actions: [
-        {
-          name: 'Checkout Commit',
-          description: "I don't actually exist yet. Just testing the UI.",
-          icon: 'mdi-timeline-check-outline',
-        },
-        {
-          name: 'Commit Result',
-          description: "I don't actually exist yet. Just testing the UI.",
-          options: [
-            {
-              type: 'SELECT',
-              id: 'stream',
-              label: 'Stream',
-              choices: '$streams',
-            },
-            {
-              type: 'SELECT',
-              id: 'branch',
-              label: 'Branch',
-              choices: ['Not', 'implemented', 'yet'],
-            },
-          ],
-        },
-        {
-          name: 'Call an API',
-          description: "I don't actually exist yet. Just testing the UI.",
-          options: [
-            {
-              type: 'SELECT',
-              id: 'method',
-              label: 'Method',
-              choices: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-              default: 'GET',
-            },
-            {
-              type: 'TEXT',
-              id: 'url',
-              label: 'url',
-            },
-            {
-              type: 'MULTILINE',
-              id: 'header',
-              label: 'Request Header',
-            },
-            {
-              type: 'MULTILINE',
-              id: 'request',
-              label: 'Request',
-            },
-          ],
-        },
-        {
-          name: 'Calculate Carbon',
-          description: "I don't actually exist yet. Just testing the UI.",
-          icon: 'mdi-leaf',
-        },
-        {
-          name: 'Dummy Action',
-          description:
-            'Does nothing, only writes to the console. Will randomly fail :)',
-          icon: 'mdi-flask',
-        },
-      ],
+      loading: true,
+      errored: false,
     }
+  },
+  computed: {
+    actions() {
+      return this.$store.state.actions
+    },
+  },
+  async mounted() {
+    await this.$store.dispatch('getActions')
+    this.loading = false
   },
   methods: {
     pushAction(action) {
-      this.recipe.push(action)
-      this.$emit('choseAction', action)
+      this.recipe.push(Object.assign({ instanceId: uuidv4() }, action))
+      this.$emit('choseAction')
     },
   },
 }
