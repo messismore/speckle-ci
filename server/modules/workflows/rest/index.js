@@ -26,11 +26,11 @@ router.get('/', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    await Workflow.create({
+    const doc = await Workflow.create({
       token: getBearerToken(req),
       ...req.body,
     })
-    res.status(202).json('Created')
+    res.status(201).json(doc._id)
   } catch (error) {
     setResponseErrorCode(error)
     next(error)

@@ -114,7 +114,7 @@
                 <h3 class="text-h6">Conditions</h3>
                 <v-combobox
                   v-model="workflow.conditions"
-                  :items="filters"
+                  :items="validFilters"
                   label="Restrict trigger to these branches or apps"
                   multiple
                   chips
@@ -154,10 +154,9 @@
                       outlined
                       :label="option.label"
                       :items="
-                        // Spitballing, should probably go with passing actual variables that hold a function or expression, $vars are ugly
                         typeof option.choices == 'string' &&
                         option.choices[0] === '$' &&
-                        ['$streams'].includes(option.choices)
+                        Object.keys(optionVars).includes(option.choices)
                           ? optionVars[option.choices]
                           : option.choices
                       "
@@ -234,7 +233,7 @@ export default {
         name: null,
         streamId: null,
         triggers: [],
-        conditions: { apps: [], branches: [] },
+        conditions: [],
         recipe: [],
       },
 
@@ -259,72 +258,105 @@ export default {
         'stream_permissions_add',
         'stream_permissions_remove',
       ],
-      filters: [
-        'These',
-        'Are',
-        'Hardcoded',
-        'And',
-        "Won't",
-        'Work',
-        'Rhino 3D',
-        'Grasshopper',
-        'Revit',
+      validApps: [
+        { name: 'Rhino 3D', id: 'Rhinoceros' },
+        { name: 'Grasshopper', id: 'Grasshopper' },
+        { name: 'Revit', id: 'Revit' },
+        { name: 'Archicad', id: 'Archicad' },
+        { name: 'Blender', id: 'Blender' },
+        { name: 'Autocad', id: 'Autocad' },
+        { name: 'QGIS', id: 'QGIS' },
+        { name: 'Excel', id: 'Excel' },
+        { name: 'ETABS', id: 'ETABS' },
+        { name: 'Dynamo', id: 'Dynamo' },
+        { name: 'Unreal', id: 'Unreal' },
+        { name: 'Unity', id: 'Unity' },
+        { name: 'Power BI', id: 'Power BI' },
+        { name: 'Civil 3D', id: 'Civil 3D' },
       ],
     }
   },
   computed: {
-    canBeSaved: {
-      get() {
-        return (
-          !!this.workflow.name &&
-          !!this.workflow.streamId &&
-          !!this.workflow.triggers[0] &&
-          !!this.workflow.recipe[0]
-        )
-      },
+    canBeSaved: function () {
+      return (
+        !!this.workflow.name &&
+        !!this.workflow.streamId &&
+        !!this.workflow.triggers[0] &&
+        !!this.workflow.recipe[0]
+      )
     },
-    missingFields: {
-      get() {
-        const mask = [
-          !this.workflow.name,
-          !this.workflow.streamId,
-          !this.workflow.triggers[0],
-          !this.workflow.recipe[0],
-        ]
-        const fields = ['a name', 'a stream', 'a trigger', 'an action'].filter(
-          (field, i) => mask[i]
-        )
+    missingFields: function () {
+      const mask = [
+        !this.workflow.name,
+        !this.workflow.streamId,
+        !this.workflow.triggers[0],
+        !this.workflow.recipe[0],
+      ]
+      const fields = ['a name', 'a stream', 'a trigger', 'an action'].filter(
+        (field, i) => mask[i]
+      )
 
-        const formattedFields = [
-          fields.slice(0, -1).join(', '),
-          fields.slice(-1),
-        ].join(fields.length < 2 ? '' : fields.length == 2 ? ' and ' : ', and ')
-        return `Your workflow still needs
+      const formattedFields = [
+        fields.slice(0, -1).join(', '),
+        fields.slice(-1),
+      ].join(fields.length < 2 ? '' : fields.length == 2 ? ' and ' : ', and ')
+      return `Your workflow still needs
         ${formattedFields}`
-      },
     },
-    optionVars: {
-      get() {
-        return {
-          $streams: this.streams.map((stream) => {
-            return { text: stream.name, value: stream.id }
-          }),
-        }
-      },
+    optionVars: function () {
+      return {
+        $streams: this.streams.map((stream) => ({
+          text: stream.name,
+          value: stream.id,
+        })),
+        $branches: this.branches.map((branch) => ({
+          text: branch.name,
+          value: branch.id,
+        })),
+        $results: this.workflow.recipe.flatMap((step) =>
+          (step.outputs ?? []).map((output) => ({
+            text: `${step.name}: ${output.name}`,
+            value: `\${results.${step.instanceId}.${output.name}}`,
+          }))
+        ),
+      }
+    },
+    branches: function () {
+      return (
+        this.streams
+          .filter((stream) => stream.id === this.workflow.streamId)
+          .pop()?.branches?.items ?? []
+      )
+    },
+    validFilters: function () {
+      return this.branches
+        .map((branch) => ({ ...branch, kind: 'branches' }))
+        .concat(
+          !!this.branches.length ? [{ divider: true }] : [],
+          this.validApps.map((app) => ({ ...app, kind: 'apps' }))
+        )
+        .map(({ name, ...filter }) => ({ ...filter, text: name }))
     },
   },
   async mounted() {
+    let workflow
     // Wait for everything to load
     await Promise.all([
       (async () => {
         this.streams = await listAllStreams()
       })(),
       (async () => {
-        if (this.workflowId) this.fetchWorkflow()
+        if (this.workflowId) {
+          workflow = await this.fetchWorkflow()
+          // this populates this.branches
+          this.workflow.streamId = workflow.streamId
+        }
       })(),
       this.$store.dispatch('getActions'),
     ])
-
+    if (this.workflowId) {
+      this.workflow = this.decompileWorkflow(workflow)
+    }
     this.loading = false
   },
   methods: {
@@ -334,20 +366,21 @@ export default {
       )
       if (token && this.$store.getters.isAuthenticated) {
         // Get the name of the workflow
-        axios
-          .get(`${process.env.VUE_APP_REST}/workflows/${this.workflowId}`, {
-            headers: {
-              Authorization: 'Bearer ' + token,
-              'Content-Type': 'application/json',
-            },
-          })
-          .then((response) => {
-            this.workflow = this.decompileWorkflow(response.data)
-          })
-          .catch((error) => {
-            console.log(error)
-            this.errored = true
-          })
+        try {
+          const response = await axios.get(
+            `${process.env.VUE_APP_REST}/workflows/${this.workflowId}`,
+            {
+              headers: {
+                Authorization: 'Bearer ' + token,
+                'Content-Type': 'application/json',
+              },
+            }
+          )
+          return response.data
+        } catch (error) {
+          console.log(error)
+          this.errored = true
+        }
       }
     },
     removeAction(i) {
@@ -356,6 +389,13 @@ export default {
     compileWorkflow() {
       return {
         ...this.workflow,
+        conditions: this.workflow.conditions.reduce(
+          (previous, current) => {
+            previous[current.kind].push(current.id)
+            return previous
+          },
+          { apps: [], branches: [] }
+        ),
         recipe: this.workflow.recipe.map((step, i, recipe) => ({
           action: step.action,
           instanceId: step.instanceId,
@@ -381,12 +421,28 @@ export default {
       }
     },
     decompileWorkflow(workflow) {
+      workflow.conditions = Object.entries(workflow.conditions).reduce(
+        (previous, [kind, items]) => {
+          previous.push(
+            ...items.map((item) => ({
+              id: item,
+              kind,
+              text:
+                this.validFilters.filter((filter) => filter.id === item).pop()
+                  ?.text ?? item,
+            }))
+          )
+          return previous
+        },
+        []
+      )
       workflow.recipe = workflow.recipe.map((step) => {
         const action = this.$store.state.actions
           .filter((action) => action.action === step.action)
           .pop()
         return {
           ...action,
+          instanceId: step.instanceId,
           options: action.options.map((option) => ({
             ...option,
             value: step.options[option.id],
@@ -396,6 +452,7 @@ export default {
       return workflow
     },
     async saveWorkflow() {
+      console.log(this.compileWorkflow())
       // Make a request to our backend
       const token = localStorage.getItem(
         `${process.env.VUE_APP_SPECKLE_APP_NAME}.AuthToken`
@@ -414,8 +471,8 @@ export default {
         })
           .then((response) => {
             console.log(response)
-            if (response.status == 200)
-              this.$router.push('/').catch((error) => {
+            if (response.status === 201 || 202)
+              this.$router.go(-1).catch((error) => {
                 console.log(error)
               })
           })

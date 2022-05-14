@@ -26,6 +26,12 @@ export const streamListAllQuery = () => `query {
     items {
       id
       name
+      branches {
+        items {
+          id
+          name
+        }
+      }
     }
   }
 }`
