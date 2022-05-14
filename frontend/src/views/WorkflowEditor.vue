@@ -471,10 +471,7 @@ export default {
         })
           .then((response) => {
             console.log(response)
-            if (response.status === 201 || 202)
-              this.$router.go(-1).catch((error) => {
-                console.log(error)
-              })
+            if (response.status === 201 || 202) this.$router.go(-1)
           })
           .catch((error) => {
             console.log(error)
