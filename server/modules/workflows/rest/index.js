@@ -26,11 +26,11 @@ router.get('/', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    await Workflow.create({
+    const doc = await Workflow.create({
       token: getBearerToken(req),
       ...req.body,
     })
-    res.status(200).json('OK')
+    res.status(201).json(doc._id)
   } catch (error) {
     setResponseErrorCode(error)
     next(error)
@@ -42,7 +42,7 @@ router.get('/:workflowId', async (req, res, next) => {
     const workflow = await Workflow.findOne({
       _id: req.params.workflowId,
     })
-      .select('-__v') // don't return version key https://mongoosejs.com/docs/guide.html#versionKey
+      .select(['-__v', '-speckleAuthToken']) // don't return version key https://mongoosejs.com/docs/guide.html#versionKey
       .exec()
 
     const triggers = await workflow.fetchTriggers({
@@ -65,9 +65,22 @@ router.get('/:workflowId', async (req, res, next) => {
   }
 })
 
-router.patch('/:workflowId', (req, res, next) =>
-  next(createError(501, 'Not Implemented'))
-)
+router.patch('/:workflowId', async (req, res, next) => {
+  try {
+    const success = Workflow.findByIdAndUpdate(
+      req.params.workflowId,
+      req.body
+    ).then((doc) =>
+      doc.setTriggers({
+        token: doc.speckleAuthToken,
+        triggers: req.body.triggers,
+      })
+    )
+    res.status(success ? 202 : 304).json(success)
+  } catch (error) {
+    next(createError(500, 'Internal Server Error'))
+  }
+})
 
 router.delete('/:workflowId', (req, res, next) =>
   next(createError(501, 'Not Implemented'))

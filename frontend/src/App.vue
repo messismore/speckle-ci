@@ -7,7 +7,7 @@
         >
       </v-app-bar-title>
       <v-spacer />
-      <v-btn v-if="isAuthenticated" text @click="$store.dispatch('logout')">
+      <v-btn v-if="isAuthenticated" text @click="logout">
         Log out {{ $store.state.user.name }}
       </v-btn>
     </v-app-bar>
@@ -24,6 +24,12 @@ export default {
   computed: {
     isAuthenticated() {
       return this.$store.getters.isAuthenticated
+    },
+  },
+  methods: {
+    async logout() {
+      await this.$store.dispatch('logout')
+      this.$router.push('/')
     },
   },
 }

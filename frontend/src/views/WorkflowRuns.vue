@@ -7,7 +7,9 @@
             <v-card-title>{{ workflowName }}</v-card-title>
             <v-spacer></v-spacer>
             <v-card-actions>
-              <v-btn depressed color="primary"> Edit workflow </v-btn>
+              <v-btn depressed color="primary" :to="$route.path + '/edit'">
+                Edit workflow
+              </v-btn>
             </v-card-actions>
           </v-row>
           <v-divider />
@@ -21,7 +23,11 @@
             </div>
 
             <v-list flat>
+              <v-card-subtitle v-if="!runs || !runs.length" justify="center">
+                <p>This workflow has not run yet</p>
+              </v-card-subtitle>
               <v-list-item-group
+                v-else
                 v-for="(run, i) in runs"
                 :key="run.createdAt + i /* sort by date, i*/"
               >
