@@ -107,13 +107,14 @@ export default {
       runs: null,
       loading: true,
       errored: false,
+      polling: null,
       backend: process.env.VUE_APP_REST,
     }
   },
-  async mounted() {
-    this.fetchRuns()
-  },
   methods: {
+    poll() {
+      this.polling = setInterval(() => this.fetchRuns(), 5000)
+    },
     async fetchRuns() {
       const token = localStorage.getItem(
         `${process.env.VUE_APP_SPECKLE_APP_NAME}.AuthToken`
@@ -132,6 +133,7 @@ export default {
             }
           )
           .then((response) => {
+            console.log('Fetched data from backend:', response.status)
             this.workflowName = response.data.name
           })
           .catch((error) => {
@@ -160,6 +162,12 @@ export default {
           .finally(() => (this.loading = false))
       }
     },
+  },
+  created() {
+    this.poll()
+  },
+  beforeDestroy() {
+    clearInterval(this.polling)
   },
 }
 </script>

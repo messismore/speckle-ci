@@ -93,13 +93,14 @@ export default {
       workflows: null,
       loading: true,
       errored: false,
+      polling: null,
     }
   },
-  async mounted() {
-    this.getWorkflows()
-  },
   methods: {
-    async getWorkflows() {
+    poll() {
+      this.polling = setInterval(() => this.fetchWorkflows(), 5000)
+    },
+    async fetchWorkflows() {
       const token = localStorage.getItem(
         `${process.env.VUE_APP_SPECKLE_APP_NAME}.AuthToken`
       )
@@ -113,6 +114,7 @@ export default {
             },
           })
           .then((response) => {
+            console.log('Fetched data from backend:', response.status)
             this.workflows = response.data.sort(
               (a, b) =>
                 (b.lastRun?.createdAt ?? -1) - (a.lastRun?.createdAt ?? -1)
@@ -125,6 +127,12 @@ export default {
           .finally(() => (this.loading = false))
       }
     },
+  },
+  created() {
+    this.poll()
+  },
+  beforeDestroy() {
+    clearInterval(this.polling)
   },
 }
 </script>
