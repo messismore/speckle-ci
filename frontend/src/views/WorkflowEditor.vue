@@ -136,7 +136,7 @@
                   :key="i"
                   elevation="5"
                   rounded="lg"
-                  class="mx-5 my-8"
+                  class="action mx-5 my-8"
                 >
                   <v-card-title class="text-subtitle-1 font-weight-regular">
                     {{ action.name }} <v-spacer />
@@ -487,6 +487,14 @@ export default {
 </script>
 
 <style>
+.workflow-editor .action + .action::before {
+  content: '⇣';
+  position: absolute;
+  left: calc(50% - (1ch / 2));
+  top: -2.4rem;
+  font-size: 2rem;
+  opacity: 0.25;
+}
 .workflow-editor .toploader {
   position: fixed;
   top: 0;
