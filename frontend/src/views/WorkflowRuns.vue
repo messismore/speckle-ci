@@ -4,7 +4,9 @@
       <v-col lg="10">
         <v-card class="rounded-lg pb-2" elevation="4">
           <v-row class="px-4 pb-2">
-            <v-card-title>{{ workflowName }}</v-card-title>
+            <v-card-title>{{
+              workflowName ? workflowName : 'Loading workflow runs…'
+            }}</v-card-title>
             <v-spacer></v-spacer>
             <v-card-actions>
               <v-btn depressed color="primary" :to="$route.path + '/edit'">
@@ -49,7 +51,9 @@
                     />
                     <v-list-item-subtitle
                       v-text="
-                        run.triggerEvent ? run.triggerEvent.eventName : ''
+                        run.triggerEvent && run.triggerEvent.name
+                          ? run.triggerEvent.eventName
+                          : ''
                       "
                     ></v-list-item-subtitle>
                   </v-list-item-content>

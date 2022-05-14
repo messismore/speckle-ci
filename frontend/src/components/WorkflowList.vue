@@ -53,12 +53,15 @@
             <v-list-item-content>
               <v-list-item-subtitle
                 v-text="
-                  (workflow.lastRun && workflow.lastRun.triggerEvent
+                  (workflow.lastRun &&
+                  workflow.lastRun.triggerEvent &&
+                  workflow.lastRun.triggerEvent.eventName
                     ? `${workflow.lastRun.triggerEvent.eventName}: `
                     : '') +
                   (workflow.lastRun &&
                   workflow.lastRun.triggerEvent &&
-                  workflow.lastRun.triggerEvent.commit
+                  workflow.lastRun.triggerEvent.commit &&
+                  workflow.lastRun.triggerEvent.commit.message
                     ? workflow.lastRun.triggerEvent.commit.message
                     : '')
                 "
