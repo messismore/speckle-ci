@@ -3,7 +3,7 @@
     <v-app-bar flat app elevate-on-scroll elevation="8" class="grey lighten-5">
       <v-app-bar-title>
         <router-link to="/" class="text-decoration-none"
-          ><h3>Speckle CI</h3></router-link
+          ><h3>Speckle Actions</h3></router-link
         >
       </v-app-bar-title>
       <v-spacer />
